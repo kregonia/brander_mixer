@@ -1,6 +1,6 @@
 # brander mixer
 
-brander mixer is a task system for performing distributed computing on edge devices after complex character segmentation.
+brander mixer 是一个任务系统，用于在复杂字符分割后在边缘设备上执行分布式计算。
 
 ![GitHub](https://img.shields.io/github/license/kregonia/brander_mixer)
 ![GitHub release](https://img.shields.io/github/v/release/kregonia/brander_mixer)
