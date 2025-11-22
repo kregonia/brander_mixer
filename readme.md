@@ -1,0 +1,95 @@
+# brander mixer
+
+brander mixer is a task system for performing distributed computing on edge devices after complex character segmentation.
+
+![GitHub](https://img.shields.io/github/license/kregonia/brander_mixer)
+![GitHub release](https://img.shields.io/github/v/release/kregonia/brander_mixer)
+
+## 功能特性
+
+- ✨ 高性能信息传输
+- 🚀 动态设备扩缩容
+- 💡 智能任务拆分
+- 🔧 异常自动修复
+
+## 快速开始
+
+### 前置要求
+
+在开始之前，请确保你的环境安装了以下软件：
+- go 1.21+
+- make
+
+### 安装步骤
+
+1. 克隆项目
+```bash
+git clone https://github.com/kregonia/brander_mixer.git
+go mod init github.com/kregonia/brander_mixer
+go mod tidy
+```
+
+2. 安装依赖
+```bash
+cd brander_mixer
+make prepare
+make build
+```
+3. 配置环境
+```bash
+# 测试环境
+export APP_ENV=dev
+# 生产环境
+export APP_ENV=production
+```
+4. 运行项目
+```bash
+# 终端机器
+make run controller
+# 边缘计算设备
+make run worker
+```
+
+## 使用方法
+
+### 基本使用
+```bash
+```
+
+### 高级配置
+如果需要更高级的功能，可以这样配置：
+```bash
+```
+
+## 项目结构
+```bash
+./
+├── bootstrap
+├── cmd
+├── go.mod
+├── LICENSE
+├── log
+├── main.go
+├── model
+│   ├── _const
+│   └── task
+├── readme.md
+├── resource
+└── script
+```
+
+## 贡献指南
+我们欢迎任何形式的贡献！请阅读以下指南：
+1. Fork 本仓库
+2. 创建特性分支 (git checkout -b feature/AmazingFeature)
+3. 提交更改 (git commit -m 'Add some AmazingFeature')
+4. 推送到分支 (git push origin feature/AmazingFeature)
+5. 开启 Pull Request
+
+## 许可证
+本项目采用 Apache 2.0 License - 查看 LICENSE 文件了解详情。
+
+## 致谢
+- [AtlasBegonia](https://https://github.com/AtlasBegonia)
+---
+如果这个项目对你有帮助，请给个 ⭐️ 支持一下！
