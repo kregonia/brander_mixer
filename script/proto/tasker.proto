@@ -1,0 +1,8 @@
+syntax = "proto3";
+package tasker;
+option go_package = "script/rpc_server/tasker;tasker";
+
+message TaskerRequest {
+  string ip = 1;
+  string port = 2;
+}

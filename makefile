@@ -1,0 +1,2 @@
+gen:
+	protoc --proto_path=script/proto --go_out=script/rpc_server/brander --go_opt=paths=source_relative --go-grpc_out=script/rpc_server/brander --go-grpc_opt=paths=source_relative  script/proto/brander.proto
