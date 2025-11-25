@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.33.0
-// source: brander.proto
+// source: controller.proto
 
-package brander_service
+package controller_service
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BranderWorkerStatus_Hearting_FullMethodName = "/brander.BranderWorkerStatus/Hearting"
+	BranderWorkerStatus_Hearting_FullMethodName = "/controller_service.BranderWorkerStatus/Hearting"
 )
 
 // BranderWorkerStatusClient is the client API for BranderWorkerStatus service.
@@ -108,7 +108,7 @@ func _BranderWorkerStatus_Hearting_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BranderWorkerStatus_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "brander.BranderWorkerStatus",
+	ServiceName: "controller_service.BranderWorkerStatus",
 	HandlerType: (*BranderWorkerStatusServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -117,5 +117,5 @@ var BranderWorkerStatus_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "brander.proto",
+	Metadata: "controller.proto",
 }

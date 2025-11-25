@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v6.33.0
-// source: brander.proto
+// source: controller.proto
 
-package brander_service
+package controller_service
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -30,7 +30,7 @@ type HeartingRequest struct {
 
 func (x *HeartingRequest) Reset() {
 	*x = HeartingRequest{}
-	mi := &file_brander_proto_msgTypes[0]
+	mi := &file_controller_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *HeartingRequest) String() string {
 func (*HeartingRequest) ProtoMessage() {}
 
 func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_brander_proto_msgTypes[0]
+	mi := &file_controller_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartingRequest.ProtoReflect.Descriptor instead.
 func (*HeartingRequest) Descriptor() ([]byte, []int) {
-	return file_brander_proto_rawDescGZIP(), []int{0}
+	return file_controller_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *HeartingRequest) GetIp() string {
@@ -79,7 +79,7 @@ type MachineStatusResponse struct {
 
 func (x *MachineStatusResponse) Reset() {
 	*x = MachineStatusResponse{}
-	mi := &file_brander_proto_msgTypes[1]
+	mi := &file_controller_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -91,7 +91,7 @@ func (x *MachineStatusResponse) String() string {
 func (*MachineStatusResponse) ProtoMessage() {}
 
 func (x *MachineStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_brander_proto_msgTypes[1]
+	mi := &file_controller_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -104,7 +104,7 @@ func (x *MachineStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MachineStatusResponse.ProtoReflect.Descriptor instead.
 func (*MachineStatusResponse) Descriptor() ([]byte, []int) {
-	return file_brander_proto_rawDescGZIP(), []int{1}
+	return file_controller_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *MachineStatusResponse) GetCpuUsage() float32 {
@@ -149,11 +149,11 @@ func (x *MachineStatusResponse) GetTaskCount() int32 {
 	return 0
 }
 
-var File_brander_proto protoreflect.FileDescriptor
+var File_controller_proto protoreflect.FileDescriptor
 
-const file_brander_proto_rawDesc = "" +
+const file_controller_proto_rawDesc = "" +
 	"\n" +
-	"\rbrander.proto\x12\abrander\"!\n" +
+	"\x10controller.proto\x12\x12controller_service\"!\n" +
 	"\x0fHeartingRequest\x12\x0e\n" +
 	"\x02ip\x18\x01 \x01(\tR\x02ip\"\xdb\x01\n" +
 	"\x15MachineStatusResponse\x12\x1b\n" +
@@ -163,30 +163,30 @@ const file_brander_proto_rawDesc = "" +
 	"\fmemory_usage\x18\x04 \x01(\x02R\vmemoryUsage\x12!\n" +
 	"\fmemory_total\x18\x05 \x01(\x02R\vmemoryTotal\x12\x1d\n" +
 	"\n" +
-	"task_count\x18\x06 \x01(\x05R\ttaskCount2[\n" +
-	"\x13BranderWorkerStatus\x12D\n" +
-	"\bHearting\x12\x18.brander.HeartingRequest\x1a\x1e.brander.MachineStatusResponseB+Z)script/rpc_server/brander;brander_serviceb\x06proto3"
+	"task_count\x18\x06 \x01(\x05R\ttaskCount2q\n" +
+	"\x13BranderWorkerStatus\x12Z\n" +
+	"\bHearting\x12#.controller_service.HeartingRequest\x1a).controller_service.MachineStatusResponseB1Z/script/rpc_server/controller;controller_serviceb\x06proto3"
 
 var (
-	file_brander_proto_rawDescOnce sync.Once
-	file_brander_proto_rawDescData []byte
+	file_controller_proto_rawDescOnce sync.Once
+	file_controller_proto_rawDescData []byte
 )
 
-func file_brander_proto_rawDescGZIP() []byte {
-	file_brander_proto_rawDescOnce.Do(func() {
-		file_brander_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_brander_proto_rawDesc), len(file_brander_proto_rawDesc)))
+func file_controller_proto_rawDescGZIP() []byte {
+	file_controller_proto_rawDescOnce.Do(func() {
+		file_controller_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)))
 	})
-	return file_brander_proto_rawDescData
+	return file_controller_proto_rawDescData
 }
 
-var file_brander_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_brander_proto_goTypes = []any{
-	(*HeartingRequest)(nil),       // 0: brander.HeartingRequest
-	(*MachineStatusResponse)(nil), // 1: brander.MachineStatusResponse
+var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_controller_proto_goTypes = []any{
+	(*HeartingRequest)(nil),       // 0: controller_service.HeartingRequest
+	(*MachineStatusResponse)(nil), // 1: controller_service.MachineStatusResponse
 }
-var file_brander_proto_depIdxs = []int32{
-	0, // 0: brander.BranderWorkerStatus.Hearting:input_type -> brander.HeartingRequest
-	1, // 1: brander.BranderWorkerStatus.Hearting:output_type -> brander.MachineStatusResponse
+var file_controller_proto_depIdxs = []int32{
+	0, // 0: controller_service.BranderWorkerStatus.Hearting:input_type -> controller_service.HeartingRequest
+	1, // 1: controller_service.BranderWorkerStatus.Hearting:output_type -> controller_service.MachineStatusResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -194,26 +194,26 @@ var file_brander_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_brander_proto_init() }
-func file_brander_proto_init() {
-	if File_brander_proto != nil {
+func init() { file_controller_proto_init() }
+func file_controller_proto_init() {
+	if File_controller_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_brander_proto_rawDesc), len(file_brander_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_brander_proto_goTypes,
-		DependencyIndexes: file_brander_proto_depIdxs,
-		MessageInfos:      file_brander_proto_msgTypes,
+		GoTypes:           file_controller_proto_goTypes,
+		DependencyIndexes: file_controller_proto_depIdxs,
+		MessageInfos:      file_controller_proto_msgTypes,
 	}.Build()
-	File_brander_proto = out.File
-	file_brander_proto_goTypes = nil
-	file_brander_proto_depIdxs = nil
+	File_controller_proto = out.File
+	file_controller_proto_goTypes = nil
+	file_controller_proto_depIdxs = nil
 }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+package worker_service;
+option go_package = "script/rpc_server/worker;worker_service";
+
+message RegistRequest {
+  string worker_id = 1;
+  string password = 2;
+}
+
+message RegistResponse {
+  bool success = 1;
+  string secret = 2;
+}
+
+service Worker2Controller {
+  rpc RegistWorker(RegistRequest) returns (RegistResponse);
+  rpc ReportTaskStatus(TaskReportRequest) returns (TaskReportResponse);
+}
+
+message Task{
+  int32 task_type = 1;
+  int32 task_level = 2;
+  int32 task_priority = 3;
+  int32 decode_type = 4;
+  bytes task_data = 5;
+  bool success = 6;
+}
+
+// status: "0:undo", "1:in_progress", "2:completed", "3:some_failed", "4:all_failed"
+message TaskReportRequest {
+  string task_id = 1;
+  int32 status = 2;
+  repeated Task detail = 3;
+}
+
+message TaskDistribution {
+  string worker_id = 1;
+  string task_id = 2;
+}
+
+message TaskReportResponse {
+  bool received = 1;
+  repeated TaskDistribution tasks = 2;
+}
+

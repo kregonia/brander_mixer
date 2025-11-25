@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package brander;
-option go_package = "script/rpc_server/brander;brander_service";
+package controller_service;
+option go_package = "script/rpc_server/controller;controller_service";
 
 message HeartingRequest {
   string ip = 1;
