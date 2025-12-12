@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"context"
 	"log"
 	"sync"
 
@@ -58,18 +57,4 @@ func (wc *WorkerClients) GetConnsByIndex(i int) *grpc.ClientConn {
 	wc.RLock()
 	defer wc.RUnlock()
 	return wc.conns[i]
-}
-
-func (wc *WorkerClients) GetWorkerStatus(ctx context.Context) []*controller_service.MachineStatusResponse {
-	statuses := make([]*controller_service.MachineStatusResponse, 0, wc.clientCount)
-	for i := 0; i < wc.clientCount; i++ {
-		client := wc.GetClientsByIndex(i)
-		resp, err := client.Hearting(ctx, &controller_service.HeartingRequest{})
-		if err != nil {
-			log.Printf("Error getting worker status from client %d: %v", i, err)
-			continue
-		}
-		statuses = append(statuses, resp)
-	}
-	return statuses
 }

@@ -19,6 +19,9 @@ brander mixer 是一个任务系统，用于在复杂字符分割后在边缘设
 在开始之前，请确保你的环境安装了以下软件：
 - go 1.21+
 - make
+- protoc-gen-go
+- protoc-gen-go-grpc
+- protobuf@3
 
 ### 安装步骤
 

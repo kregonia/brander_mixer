@@ -3,11 +3,7 @@ syntax = "proto3";
 package controller_service;
 option go_package = "script/rpc_server/controller;controller_service";
 
-message HeartingRequest {
-  string ip = 1;
-}
-
-message MachineStatusResponse {
+message Status {
   float cpu_usage = 1;
   int32 cpu_cores = 2;
   float cpu_frequency = 3;
@@ -16,6 +12,14 @@ message MachineStatusResponse {
   int32 task_count = 6;
 }
 
+message HeartingRequest {
+  string ip = 1;
+  Status status = 2;
+}
+
+message HeartingResponse {
+}
+
 service BranderWorkerStatus {
-  rpc Hearting(HeartingRequest) returns (MachineStatusResponse);
+  rpc Hearting(HeartingRequest) returns (HeartingResponse);
 }
