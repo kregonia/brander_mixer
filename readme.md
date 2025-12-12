@@ -57,6 +57,12 @@ make run worker
 
 ### 基本使用
 ```bash
+prepare:
+    make init
+regen protoc:
+    make gen
+all:
+    make all
 ```
 
 ### 高级配置
