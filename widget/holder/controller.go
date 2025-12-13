@@ -12,32 +12,32 @@ import (
 )
 
 const (
-	filePrefix = "status_log_"
-)
-
-const (
-	DefaultTimeDifference = 60 // 默认刷新时间，单位秒
+	filePrefix            = "status_log_"
+	timeStampDataFolder   = "./data/timestamp/"
+	defaultTimeDifference = 60 // 默认刷新时间，单位秒
+	defaultRefreshTimes   = 10 // 默认刷新次数
 )
 
 type StatusSlice struct {
-	BeginTimestamp int64
-	TimeDifference int64
-	Status         controller_service.RepeatedStatus
-	sync.RWMutex
-}
-
-type StatusHolder struct {
-	m                   sync.Map
+	BeginTimestamp      int64
+	TimeDifference      int64
+	Status              controller_service.RepeatedStatus
 	refreshTimes        uint
 	defaultRefreshTimes uint
 	sync.RWMutex
 }
 
-func NewStatusSlice(beginTimeStamp int64) *StatusSlice {
+type StatusHolder struct {
+	m sync.Map
+}
+
+func NewStatusSlice(beginTimeStamp int64, refreshTimes uint) *StatusSlice {
 	return &StatusSlice{
-		BeginTimestamp: beginTimeStamp,
-		TimeDifference: DefaultTimeDifference * int64(time.Second),
-		Status:         controller_service.RepeatedStatus{Statuses: make([]*controller_service.Status, 0)},
+		BeginTimestamp:      beginTimeStamp,
+		TimeDifference:      defaultTimeDifference * int64(time.Second),
+		Status:              controller_service.RepeatedStatus{Statuses: make([]*controller_service.Status, 0)},
+		refreshTimes:        refreshTimes,
+		defaultRefreshTimes: refreshTimes,
 	}
 }
 
@@ -51,11 +51,27 @@ func (ss *StatusSlice) ToBytes() ([]byte, error) {
 	return result, nil
 }
 
+func (ss *StatusSlice) FromBytes(data []byte) error {
+	ss.Lock()
+	defer ss.Unlock()
+	return proto.Unmarshal(data, &ss.Status)
+}
+
+func (ss *StatusSlice) GetLength() int {
+	ss.RLock()
+	defer ss.RUnlock()
+	return len(ss.Status.Statuses)
+}
+
+func (ss *StatusSlice) AppendStatus(status *controller_service.Status) {
+	ss.Lock()
+	defer ss.Unlock()
+	ss.Status.Statuses = append(ss.Status.Statuses, status)
+}
+
 func NewStatusHolder(refreshTimes uint) *StatusHolder {
 	return &StatusHolder{
-		m:                   sync.Map{},
-		refreshTimes:        refreshTimes,
-		defaultRefreshTimes: refreshTimes,
+		m: sync.Map{},
 	}
 }
 func (sh *StatusHolder) Store(key string, value *StatusSlice) {
@@ -70,86 +86,89 @@ func (sh *StatusHolder) Load(key string) (*StatusSlice, bool) {
 	return v.(*StatusSlice), true
 }
 
+func (sh *StatusHolder) AppendStatusByKey(key string, value *controller_service.Status) {
+	v, ok := sh.m.Load(key)
+	if !ok {
+		ss := NewStatusSlice(time.Now().Unix(), defaultRefreshTimes)
+		ss.AppendStatus(value)
+		sh.m.Store(key, ss)
+		return
+	}
+	v.(*StatusSlice).AppendStatus(value)
+	sh.DecreaseRefreshTimeByKey(key)
+}
+
 func (sh *StatusHolder) Delete(key string) {
 	sh.m.Delete(key)
 }
 
-func (sh *StatusHolder) Copy() *StatusHolder {
-	newHolder := NewStatusHolder(sh.defaultRefreshTimes)
-	sh.m.Range(func(key, value any) bool {
-		copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp)
-		copyValue.Lock()
-		for _, status := range value.(*controller_service.RepeatedStatus).Statuses {
-			copyStatus := &controller_service.Status{
-				CpuUsage:     status.CpuUsage,
-				CpuCores:     status.CpuCores,
-				CpuFrequency: status.CpuFrequency,
-				MemoryUsage:  status.MemoryUsage,
-				MemoryTotal:  status.MemoryTotal,
-				TaskCount:    status.TaskCount,
-			}
-			copyValue.Status.Statuses = append(copyValue.Status.Statuses, copyStatus)
+func (sh *StatusHolder) CopyByKey(key string) *StatusSlice {
+	value, ok := sh.m.Load(key)
+	if !ok {
+		return nil
+	}
+	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes)
+	copyValue.Lock()
+	for _, status := range value.(*StatusSlice).Status.Statuses {
+		copyStatus := &controller_service.Status{
+			CpuUsage:     status.CpuUsage,
+			CpuCores:     status.CpuCores,
+			CpuFrequency: status.CpuFrequency,
+			MemoryUsage:  status.MemoryUsage,
+			MemoryTotal:  status.MemoryTotal,
+			TaskCount:    status.TaskCount,
 		}
-		copyValue.Unlock()
-		newHolder.m.Store(key, copyValue)
-		return true
-	})
-	return newHolder
+		copyValue.Status.Statuses = append(copyValue.Status.Statuses, copyStatus)
+	}
+	copyValue.Unlock()
+	return copyValue
 }
 
 func (sh *StatusHolder) GetMap() *sync.Map {
 	return &sh.m
 }
 
-func (sh *StatusHolder) GetDefaultRefreshTime() uint {
-	return sh.defaultRefreshTimes
-}
-
-func (sh *StatusHolder) DecreaseRefreshTime() {
-	sh.Lock()
-	defer sh.Unlock()
-	if sh.refreshTimes >= 1 {
-		sh.refreshTimes--
+func (sh *StatusHolder) DecreaseRefreshTimeByKey(key string) {
+	v, ok := sh.m.Load(key)
+	if !ok {
+		return
 	}
-	if sh.refreshTimes == 0 {
-		// todo:write the status log to disk
-		sh.Flash2Disk()
-		// end
-		sh.reSetRefreshTime()
+	v.(*StatusSlice).Lock()
+	defer v.(*StatusSlice).Unlock()
+	if v.(*StatusSlice).refreshTimes > 1 {
+		v.(*StatusSlice).refreshTimes--
+	} else {
+		v.(*StatusSlice).refreshTimes = defaultRefreshTimes
+		sh.Flash2DiskByKey(key)
 	}
 }
 
-func (sh *StatusHolder) reSetRefreshTime() {
-	sh.refreshTimes = sh.defaultRefreshTimes
-}
-
-func (sh *StatusHolder) Flash2Disk() {
+func (sh *StatusHolder) Flash2DiskByKey(key string) {
 	// todo: 对每个worker的status进行落盘
-	value := sh.Copy()
-	value.m.Range(func(key, val any) bool {
-		// key 是worker的ip地址
-		fileName := fmt.Sprintf("%s%s_%s.brander", filePrefix, key.(string), time.Now().Format("20060102"))
-		f, err := os.OpenFile(
-			fileName,
-			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644,
-		)
-		if err != nil {
-			logger.Errorf("[controller Flash2Disk] error,can't open or create file %s ,err:%v\n", fileName, err)
-			return true
+	value := sh.CopyByKey(key)
+	// key 是worker的ip地址
+	fileName := fmt.Sprintf("%s%s%s_%s.brander", timeStampDataFolder, filePrefix, key, time.Now().Format("20060102"))
+	if _, err := os.Stat(timeStampDataFolder); os.IsNotExist(err) {
+		if err := os.MkdirAll(timeStampDataFolder, 0755); err != nil {
+			logger.Errorf("[controller Flash2Disk] error,can't create folder %s ,err:%v\n", timeStampDataFolder, err)
 		}
-		defer f.Close()
-		statusSlice := val.(*StatusSlice)
-		statusSlice.RLock()
-		defer statusSlice.RUnlock()
-		data, err := statusSlice.ToBytes()
-		if err != nil {
-			logger.Errorf("[controller Flash2Disk] error,can't marshal statusSlice ,err:%v\n", err)
-			return true
-		}
-		_, err = f.Write(data)
-		if err != nil {
-			logger.Errorf("[controller Flash2Disk] error,can't write to file %s ,err:%v\n", fileName, err)
-		}
-		return true
-	})
+	}
+	f, err := os.OpenFile(
+		fileName,
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644,
+	)
+	if err != nil {
+		logger.Errorf("[controller Flash2Disk] error,can't open or create file %s ,err:%v\n", fileName, err)
+	}
+	defer f.Close()
+	value.RLock()
+	defer value.RUnlock()
+	data, err := value.ToBytes()
+	if err != nil {
+		logger.Errorf("[controller Flash2Disk] error,can't marshal statusSlice ,err:%v\n", err)
+	}
+	_, err = f.Write(data)
+	if err != nil {
+		logger.Errorf("[controller Flash2Disk] error,can't write to file %s ,err:%v\n", fileName, err)
+	}
 }
