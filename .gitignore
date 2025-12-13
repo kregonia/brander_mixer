@@ -3,3 +3,4 @@ go.sum
 bin/
 cmd/demo
 data/
+bin/

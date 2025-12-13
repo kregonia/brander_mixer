@@ -4,3 +4,5 @@ gen:
 init:
 	go mod init github.com/kregonia/brander_mixer
 	go mod tidy
+build:
+	go build -o bin/disk_status_reader cmd/disk_status_reader/main.go

@@ -1,6 +1,7 @@
 package holder
 
 import (
+	"encoding/binary"
 	"fmt"
 	"os"
 	"sync"
@@ -18,7 +19,12 @@ const (
 	defaultRefreshTimes   = 10 // 默认刷新次数
 )
 
+var (
+	flashChannel = make(chan func(), 1)
+)
+
 type StatusSlice struct {
+	file                *os.File
 	BeginTimestamp      int64
 	TimeDifference      int64
 	Status              controller_service.RepeatedStatus
@@ -31,8 +37,9 @@ type StatusHolder struct {
 	m sync.Map
 }
 
-func NewStatusSlice(beginTimeStamp int64, refreshTimes uint) *StatusSlice {
+func NewStatusSlice(beginTimeStamp int64, refreshTimes uint, file *os.File) *StatusSlice {
 	return &StatusSlice{
+		file:                file,
 		BeginTimestamp:      beginTimeStamp,
 		TimeDifference:      defaultTimeDifference * int64(time.Second),
 		Status:              controller_service.RepeatedStatus{Statuses: make([]*controller_service.Status, 0)},
@@ -49,12 +56,6 @@ func (ss *StatusSlice) ToBytes() ([]byte, error) {
 		return nil, err
 	}
 	return result, nil
-}
-
-func (ss *StatusSlice) FromBytes(data []byte) error {
-	ss.Lock()
-	defer ss.Unlock()
-	return proto.Unmarshal(data, &ss.Status)
 }
 
 func (ss *StatusSlice) GetLength() int {
@@ -87,15 +88,33 @@ func (sh *StatusHolder) Load(key string) (*StatusSlice, bool) {
 }
 
 func (sh *StatusHolder) AppendStatusByKey(key string, value *controller_service.Status) {
+	defer sh.DecreaseRefreshTimeByKey(key)
 	v, ok := sh.m.Load(key)
 	if !ok {
-		ss := NewStatusSlice(time.Now().Unix(), defaultRefreshTimes)
+		// 第一次存储该key
+		fileName := fmt.Sprintf("%s%s%s_%s.brander", timeStampDataFolder, filePrefix, key, time.Now().Format("20060102"))
+		if _, err := os.Stat(timeStampDataFolder); os.IsNotExist(err) {
+			if err := os.MkdirAll(timeStampDataFolder, 0755); err != nil {
+				logger.Errorf("[controller Flash2Disk] error,can't create folder %s ,err:%v\n", timeStampDataFolder, err)
+				return
+			}
+		}
+		f, err := os.OpenFile(
+			fileName,
+			os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644,
+		)
+		if err != nil {
+			logger.Errorf("[controller Flash2Disk] error,can't open or create file %s ,err:%v\n", fileName, err)
+			return
+		}
+		// end
+		ss := NewStatusSlice(time.Now().Unix(), defaultRefreshTimes, f)
 		ss.AppendStatus(value)
 		sh.m.Store(key, ss)
 		return
 	}
 	v.(*StatusSlice).AppendStatus(value)
-	sh.DecreaseRefreshTimeByKey(key)
+
 }
 
 func (sh *StatusHolder) Delete(key string) {
@@ -107,7 +126,7 @@ func (sh *StatusHolder) CopyByKey(key string) *StatusSlice {
 	if !ok {
 		return nil
 	}
-	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes)
+	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes, value.(*StatusSlice).file)
 	copyValue.Lock()
 	for _, status := range value.(*StatusSlice).Status.Statuses {
 		copyStatus := &controller_service.Status{
@@ -139,35 +158,42 @@ func (sh *StatusHolder) DecreaseRefreshTimeByKey(key string) {
 		v.(*StatusSlice).refreshTimes--
 	} else {
 		v.(*StatusSlice).refreshTimes = defaultRefreshTimes
-		sh.Flash2DiskByKey(key)
+		flashChannel <- func() {
+			sh.Flash2DiskByKey(key)
+		}
+		(<-flashChannel)()
 	}
 }
 
 func (sh *StatusHolder) Flash2DiskByKey(key string) {
 	// todo: 对每个worker的status进行落盘
 	value := sh.CopyByKey(key)
+	sh.Delete(key)
+	sh.Store(key, NewStatusSlice(time.Now().Unix(), defaultRefreshTimes, value.file))
 	// key 是worker的ip地址
 	fileName := fmt.Sprintf("%s%s%s_%s.brander", timeStampDataFolder, filePrefix, key, time.Now().Format("20060102"))
 	if _, err := os.Stat(timeStampDataFolder); os.IsNotExist(err) {
 		if err := os.MkdirAll(timeStampDataFolder, 0755); err != nil {
 			logger.Errorf("[controller Flash2Disk] error,can't create folder %s ,err:%v\n", timeStampDataFolder, err)
+			return
 		}
 	}
-	f, err := os.OpenFile(
-		fileName,
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644,
-	)
-	if err != nil {
-		logger.Errorf("[controller Flash2Disk] error,can't open or create file %s ,err:%v\n", fileName, err)
-	}
-	defer f.Close()
 	value.RLock()
 	defer value.RUnlock()
 	data, err := value.ToBytes()
 	if err != nil {
 		logger.Errorf("[controller Flash2Disk] error,can't marshal statusSlice ,err:%v\n", err)
+		return
 	}
-	_, err = f.Write(data)
+	var lenBuf [4]byte
+	binary.BigEndian.PutUint32(lenBuf[:], uint32(len(data)))
+
+	// 先写长度
+	if _, err := value.file.Write(lenBuf[:]); err != nil {
+		logger.Errorf("[controller Flash2Disk] error,can't write length to file %s ,err:%v\n", fileName, err)
+		return
+	}
+	_, err = value.file.Write(data)
 	if err != nil {
 		logger.Errorf("[controller Flash2Disk] error,can't write to file %s ,err:%v\n", fileName, err)
 	}
