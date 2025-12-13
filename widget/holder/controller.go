@@ -159,9 +159,12 @@ func (sh *StatusHolder) DecreaseRefreshTimeByKey(key string) {
 	} else {
 		v.(*StatusSlice).refreshTimes = defaultRefreshTimes
 		flashChannel <- func() {
+			flashChannel <- func() {}
 			sh.Flash2DiskByKey(key)
+			<-flashChannel
 		}
-		(<-flashChannel)()
+		do := <-flashChannel
+		go do()
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 
 func TestFlash(t *testing.T) {
 	sh := NewStatusHolder(10)
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 3000; i++ {
 		sh.AppendStatusByKey("test_01", &controller_service.Status{CpuUsage: float32(i)})
 	}
 	time.Sleep(3 * time.Second)
