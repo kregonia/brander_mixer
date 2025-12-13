@@ -12,6 +12,10 @@ message Status {
   int32 task_count = 6;
 }
 
+message RepeatedStatus {
+  repeated Status statuses = 1;
+}
+
 message HeartingRequest {
   string ip = 1;
   Status status = 2;

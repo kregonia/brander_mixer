@@ -105,6 +105,50 @@ func (x *Status) GetTaskCount() int32 {
 	return 0
 }
 
+type RepeatedStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Statuses      []*Status              `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RepeatedStatus) Reset() {
+	*x = RepeatedStatus{}
+	mi := &file_controller_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RepeatedStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RepeatedStatus) ProtoMessage() {}
+
+func (x *RepeatedStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RepeatedStatus.ProtoReflect.Descriptor instead.
+func (*RepeatedStatus) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RepeatedStatus) GetStatuses() []*Status {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
+}
+
 type HeartingRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ip            string                 `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
@@ -115,7 +159,7 @@ type HeartingRequest struct {
 
 func (x *HeartingRequest) Reset() {
 	*x = HeartingRequest{}
-	mi := &file_controller_proto_msgTypes[1]
+	mi := &file_controller_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -127,7 +171,7 @@ func (x *HeartingRequest) String() string {
 func (*HeartingRequest) ProtoMessage() {}
 
 func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[1]
+	mi := &file_controller_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -140,7 +184,7 @@ func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartingRequest.ProtoReflect.Descriptor instead.
 func (*HeartingRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{1}
+	return file_controller_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *HeartingRequest) GetIp() string {
@@ -165,7 +209,7 @@ type HeartingResponse struct {
 
 func (x *HeartingResponse) Reset() {
 	*x = HeartingResponse{}
-	mi := &file_controller_proto_msgTypes[2]
+	mi := &file_controller_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -177,7 +221,7 @@ func (x *HeartingResponse) String() string {
 func (*HeartingResponse) ProtoMessage() {}
 
 func (x *HeartingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[2]
+	mi := &file_controller_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -190,7 +234,7 @@ func (x *HeartingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartingResponse.ProtoReflect.Descriptor instead.
 func (*HeartingResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{2}
+	return file_controller_proto_rawDescGZIP(), []int{3}
 }
 
 var File_controller_proto protoreflect.FileDescriptor
@@ -205,7 +249,9 @@ const file_controller_proto_rawDesc = "" +
 	"\fmemory_usage\x18\x04 \x01(\x02R\vmemoryUsage\x12!\n" +
 	"\fmemory_total\x18\x05 \x01(\x02R\vmemoryTotal\x12\x1d\n" +
 	"\n" +
-	"task_count\x18\x06 \x01(\x05R\ttaskCount\"U\n" +
+	"task_count\x18\x06 \x01(\x05R\ttaskCount\"H\n" +
+	"\x0eRepeatedStatus\x126\n" +
+	"\bstatuses\x18\x01 \x03(\v2\x1a.controller_service.StatusR\bstatuses\"U\n" +
 	"\x0fHeartingRequest\x12\x0e\n" +
 	"\x02ip\x18\x01 \x01(\tR\x02ip\x122\n" +
 	"\x06status\x18\x02 \x01(\v2\x1a.controller_service.StatusR\x06status\"\x12\n" +
@@ -225,21 +271,23 @@ func file_controller_proto_rawDescGZIP() []byte {
 	return file_controller_proto_rawDescData
 }
 
-var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_controller_proto_goTypes = []any{
 	(*Status)(nil),           // 0: controller_service.Status
-	(*HeartingRequest)(nil),  // 1: controller_service.HeartingRequest
-	(*HeartingResponse)(nil), // 2: controller_service.HeartingResponse
+	(*RepeatedStatus)(nil),   // 1: controller_service.RepeatedStatus
+	(*HeartingRequest)(nil),  // 2: controller_service.HeartingRequest
+	(*HeartingResponse)(nil), // 3: controller_service.HeartingResponse
 }
 var file_controller_proto_depIdxs = []int32{
-	0, // 0: controller_service.HeartingRequest.status:type_name -> controller_service.Status
-	1, // 1: controller_service.BranderWorkerStatus.Hearting:input_type -> controller_service.HeartingRequest
-	2, // 2: controller_service.BranderWorkerStatus.Hearting:output_type -> controller_service.HeartingResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: controller_service.RepeatedStatus.statuses:type_name -> controller_service.Status
+	0, // 1: controller_service.HeartingRequest.status:type_name -> controller_service.Status
+	2, // 2: controller_service.BranderWorkerStatus.Hearting:input_type -> controller_service.HeartingRequest
+	3, // 3: controller_service.BranderWorkerStatus.Hearting:output_type -> controller_service.HeartingResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_controller_proto_init() }
@@ -253,7 +301,7 @@ func file_controller_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
