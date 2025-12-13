@@ -47,22 +47,15 @@ export APP_ENV=production
 ```
 4. 运行项目
 ```bash
-# 终端机器
-make run controller
-# 边缘计算设备
-make run worker
+./bin/disk_status_reader
 ```
 
 ## 使用方法
 
 ### 基本使用
 ```bash
-prepare:
-    make init
-regen protoc:
-    make gen
-all:
-    make all
+./bin/disk_status_reader -h : 打印帮助信息
+./bin/disk_status_reader -in file1 -out file2 : 解序列化file2为可读文件
 ```
 
 ### 高级配置
