@@ -173,14 +173,6 @@ func (sh *StatusHolder) Flash2DiskByKey(key string) {
 	value := sh.CopyByKey(key)
 	sh.Delete(key)
 	sh.Store(key, NewStatusSlice(time.Now().Unix(), defaultRefreshTimes, value.file))
-	// key 是worker的ip地址
-	fileName := fmt.Sprintf("%s%s%s_%s.brander", timeStampDataFolder, filePrefix, key, time.Now().Format("20060102"))
-	if _, err := os.Stat(timeStampDataFolder); os.IsNotExist(err) {
-		if err := os.MkdirAll(timeStampDataFolder, 0755); err != nil {
-			logger.Errorf("[controller Flash2Disk] error,can't create folder %s ,err:%v\n", timeStampDataFolder, err)
-			return
-		}
-	}
 	value.RLock()
 	defer value.RUnlock()
 	data, err := value.ToBytes()
@@ -193,11 +185,11 @@ func (sh *StatusHolder) Flash2DiskByKey(key string) {
 
 	// 先写长度
 	if _, err := value.file.Write(lenBuf[:]); err != nil {
-		logger.Errorf("[controller Flash2Disk] error,can't write length to file %s ,err:%v\n", fileName, err)
+		logger.Errorf("[controller Flash2Disk] error,can't write length to file %s ,err:%v\n", value.file.Name(), err)
 		return
 	}
 	_, err = value.file.Write(data)
 	if err != nil {
-		logger.Errorf("[controller Flash2Disk] error,can't write to file %s ,err:%v\n", fileName, err)
+		logger.Errorf("[controller Flash2Disk] error,can't write to file %s ,err:%v\n", value.file.Name(), err)
 	}
 }
