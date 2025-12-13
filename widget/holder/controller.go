@@ -8,7 +8,7 @@ import (
 	"time"
 
 	logger "github.com/kregonia/brander_mixer/log"
-	controller_service "github.com/kregonia/brander_mixer/script/rpc_server/controller"
+	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -27,7 +27,7 @@ type StatusSlice struct {
 	file                *os.File
 	BeginTimestamp      int64
 	TimeDifference      int64
-	Status              controller_service.RepeatedStatus
+	Status              worker_2_controller_service.RepeatedStatus
 	refreshTimes        uint
 	defaultRefreshTimes uint
 	sync.RWMutex
@@ -42,7 +42,7 @@ func NewStatusSlice(beginTimeStamp int64, refreshTimes uint, file *os.File) *Sta
 		file:                file,
 		BeginTimestamp:      beginTimeStamp,
 		TimeDifference:      defaultTimeDifference * int64(time.Second),
-		Status:              controller_service.RepeatedStatus{Statuses: make([]*controller_service.Status, 0)},
+		Status:              worker_2_controller_service.RepeatedStatus{Statuses: make([]*worker_2_controller_service.Status, 0)},
 		refreshTimes:        refreshTimes,
 		defaultRefreshTimes: refreshTimes,
 	}
@@ -64,13 +64,13 @@ func (ss *StatusSlice) GetLength() int {
 	return len(ss.Status.Statuses)
 }
 
-func (ss *StatusSlice) AppendStatus(status *controller_service.Status) {
+func (ss *StatusSlice) AppendStatus(status *worker_2_controller_service.Status) {
 	ss.Lock()
 	defer ss.Unlock()
 	ss.Status.Statuses = append(ss.Status.Statuses, status)
 }
 
-func NewStatusHolder(refreshTimes uint) *StatusHolder {
+func NewStatusHolder() *StatusHolder {
 	return &StatusHolder{
 		m: sync.Map{},
 	}
@@ -87,7 +87,7 @@ func (sh *StatusHolder) Load(key string) (*StatusSlice, bool) {
 	return v.(*StatusSlice), true
 }
 
-func (sh *StatusHolder) AppendStatusByKey(key string, value *controller_service.Status) {
+func (sh *StatusHolder) AppendStatusByKey(key string, value *worker_2_controller_service.Status) {
 	defer sh.DecreaseRefreshTimeByKey(key)
 	v, ok := sh.m.Load(key)
 	if !ok {
@@ -129,7 +129,7 @@ func (sh *StatusHolder) CopyByKey(key string) *StatusSlice {
 	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes, value.(*StatusSlice).file)
 	copyValue.Lock()
 	for _, status := range value.(*StatusSlice).Status.Statuses {
-		copyStatus := &controller_service.Status{
+		copyStatus := &worker_2_controller_service.Status{
 			CpuUsage:     status.CpuUsage,
 			CpuCores:     status.CpuCores,
 			CpuFrequency: status.CpuFrequency,

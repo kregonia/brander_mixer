@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kregonia/brander_mixer/model/status"
+	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
 )
 
 // GetWorkerStatus 收集当前机器的基础运行信息（尽量在 Linux 上工作）
-func GetWorkerStatus() status.WorkerStatus {
+func GetWorkerStatus() worker_2_controller_service.Status {
 	cores := runtime.NumCPU()
 
 	// CPU 频率（MHz）: 优先尝试 sysfs，再尝试 /proc/cpuinfo
@@ -23,33 +23,33 @@ func GetWorkerStatus() status.WorkerStatus {
 
 	// 内存: 从 /proc/meminfo 读取（返回 bytes）
 	memTotal, memAvail := readMemInfo()
-	memUsage := 0.0
+	memUsage := float32(0.0)
 	if memTotal > 0 {
-		used := float64(memTotal - memAvail)
-		memUsage = used / float64(memTotal) * 100.0
+		used := memTotal - memAvail
+		memUsage = used / memTotal * 100.0
 	}
 
 	// 任务数：使用当前 goroutine 数作为近似值
 	taskNum := runtime.NumGoroutine()
 
-	return status.WorkerStatus{
-		CPUUsage: cpuUsage,
-		CPUCores: int32(cores),
-		CPUFreq:  freq,
-		MemUsage: memUsage,
-		MemTotal: memTotal,
-		TaskNum:  int32(taskNum),
+	return worker_2_controller_service.Status{
+		CpuUsage:     cpuUsage,
+		CpuCores:     int32(cores),
+		CpuFrequency: freq,
+		MemoryUsage:  memUsage,
+		MemoryTotal:  memTotal,
+		TaskCount:    int32(taskNum),
 	}
 }
 
 // readCPUFreq 尝试读取 CPU 频率（MHz），若失败返回 0
-func readCPUFreq() float64 {
+func readCPUFreq() float32 {
 	// 尝试 sysfs: cpuinfo_max_freq (单位 kHz)
 	p := "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 	if b, err := os.ReadFile(p); err == nil {
 		s := strings.TrimSpace(string(b))
-		if v, err := strconv.ParseFloat(s, 64); err == nil && v > 0 {
-			return v / 1000.0 / 1000.0 // kHz -> MHz
+		if v, err := strconv.ParseFloat(s, 32); err == nil && v > 0 {
+			return float32(v) / 1000.0 / 1000.0 // kHz -> MHz
 		}
 	}
 
@@ -60,8 +60,8 @@ func readCPUFreq() float64 {
 			if strings.HasPrefix(strings.ToLower(strings.TrimSpace(ln)), "cpu mhz") {
 				parts := strings.Split(ln, ":")
 				if len(parts) >= 2 {
-					if v, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64); err == nil {
-						return v
+					if v, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 32); err == nil {
+						return float32(v)
 					}
 				}
 			}
@@ -71,7 +71,7 @@ func readCPUFreq() float64 {
 }
 
 // readCPUUsage 通过两次读取 /proc/stat 计算短时 CPU 使用率（百分比）
-func readCPUUsage() float64 {
+func readCPUUsage() float32 {
 	idle0, total0, err := readCPUSTat()
 	if err != nil {
 		return 0
@@ -81,8 +81,8 @@ func readCPUUsage() float64 {
 	if err != nil || total1 <= total0 {
 		return 0
 	}
-	idleTicks := float64(idle1 - idle0)
-	totalTicks := float64(total1 - total0)
+	idleTicks := float32(idle1 - idle0)
+	totalTicks := float32(total1 - total0)
 	if totalTicks == 0 {
 		return 0
 	}
@@ -138,26 +138,26 @@ func readCPUSTat() (idle, total uint64, err error) {
 }
 
 // readMemInfo 读取 /proc/meminfo，返回 (totalBytes, availableBytes)
-func readMemInfo() (float64, float64) {
+func readMemInfo() (float32, float32) {
 	b, err := os.ReadFile("/proc/meminfo")
 	if err != nil {
 		return 0, 0
 	}
-	var totalKB, availKB float64
+	var totalKB, availKB float32
 	lines := strings.Split(string(b), "\n")
 	for _, ln := range lines {
 		if strings.HasPrefix(ln, "MemTotal:") {
 			parts := strings.Fields(ln)
 			if len(parts) >= 2 {
-				if v, err := strconv.ParseFloat(parts[1], 64); err == nil {
-					totalKB = v
+				if v, err := strconv.ParseFloat(parts[1], 32); err == nil {
+					totalKB = float32(v)
 				}
 			}
 		} else if strings.HasPrefix(ln, "MemAvailable:") {
 			parts := strings.Fields(ln)
 			if len(parts) >= 2 {
-				if v, err := strconv.ParseFloat(parts[1], 64); err == nil {
-					availKB = v
+				if v, err := strconv.ParseFloat(parts[1], 32); err == nil {
+					availKB = float32(v)
 				}
 			}
 		}

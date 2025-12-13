@@ -4,7 +4,7 @@
 // 	protoc        v6.32.1
 // source: controller.proto
 
-package controller_service
+package controller_2_worker_service
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -21,32 +21,31 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Status struct {
+type Task struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	CpuUsage      float32                `protobuf:"fixed32,1,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
-	CpuCores      int32                  `protobuf:"varint,2,opt,name=cpu_cores,json=cpuCores,proto3" json:"cpu_cores,omitempty"`
-	CpuFrequency  float32                `protobuf:"fixed32,3,opt,name=cpu_frequency,json=cpuFrequency,proto3" json:"cpu_frequency,omitempty"`
-	MemoryUsage   float32                `protobuf:"fixed32,4,opt,name=memory_usage,json=memoryUsage,proto3" json:"memory_usage,omitempty"`
-	MemoryTotal   float32                `protobuf:"fixed32,5,opt,name=memory_total,json=memoryTotal,proto3" json:"memory_total,omitempty"`
-	TaskCount     int32                  `protobuf:"varint,6,opt,name=task_count,json=taskCount,proto3" json:"task_count,omitempty"`
+	TaskType      int32                  `protobuf:"varint,1,opt,name=task_type,json=taskType,proto3" json:"task_type,omitempty"`
+	TaskLevel     int32                  `protobuf:"varint,2,opt,name=task_level,json=taskLevel,proto3" json:"task_level,omitempty"`
+	TaskPriority  int32                  `protobuf:"varint,3,opt,name=task_priority,json=taskPriority,proto3" json:"task_priority,omitempty"`
+	TaskData      []byte                 `protobuf:"bytes,4,opt,name=task_data,json=taskData,proto3" json:"task_data,omitempty"`
+	Success       bool                   `protobuf:"varint,5,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Status) Reset() {
-	*x = Status{}
+func (x *Task) Reset() {
+	*x = Task{}
 	mi := &file_controller_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Status) String() string {
+func (x *Task) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Status) ProtoMessage() {}
+func (*Task) ProtoMessage() {}
 
-func (x *Status) ProtoReflect() protoreflect.Message {
+func (x *Task) ProtoReflect() protoreflect.Message {
 	mi := &file_controller_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,120 +57,69 @@ func (x *Status) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Status.ProtoReflect.Descriptor instead.
-func (*Status) Descriptor() ([]byte, []int) {
+// Deprecated: Use Task.ProtoReflect.Descriptor instead.
+func (*Task) Descriptor() ([]byte, []int) {
 	return file_controller_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Status) GetCpuUsage() float32 {
+func (x *Task) GetTaskType() int32 {
 	if x != nil {
-		return x.CpuUsage
+		return x.TaskType
 	}
 	return 0
 }
 
-func (x *Status) GetCpuCores() int32 {
+func (x *Task) GetTaskLevel() int32 {
 	if x != nil {
-		return x.CpuCores
+		return x.TaskLevel
 	}
 	return 0
 }
 
-func (x *Status) GetCpuFrequency() float32 {
+func (x *Task) GetTaskPriority() int32 {
 	if x != nil {
-		return x.CpuFrequency
+		return x.TaskPriority
 	}
 	return 0
 }
 
-func (x *Status) GetMemoryUsage() float32 {
+func (x *Task) GetTaskData() []byte {
 	if x != nil {
-		return x.MemoryUsage
-	}
-	return 0
-}
-
-func (x *Status) GetMemoryTotal() float32 {
-	if x != nil {
-		return x.MemoryTotal
-	}
-	return 0
-}
-
-func (x *Status) GetTaskCount() int32 {
-	if x != nil {
-		return x.TaskCount
-	}
-	return 0
-}
-
-type RepeatedStatus struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Statuses      []*Status              `protobuf:"bytes,1,rep,name=statuses,proto3" json:"statuses,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RepeatedStatus) Reset() {
-	*x = RepeatedStatus{}
-	mi := &file_controller_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RepeatedStatus) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RepeatedStatus) ProtoMessage() {}
-
-func (x *RepeatedStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RepeatedStatus.ProtoReflect.Descriptor instead.
-func (*RepeatedStatus) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *RepeatedStatus) GetStatuses() []*Status {
-	if x != nil {
-		return x.Statuses
+		return x.TaskData
 	}
 	return nil
 }
 
-type HeartingRequest struct {
+func (x *Task) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type TaskReportRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ip            string                 `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
-	Status        *Status                `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	TaskPortId    string                 `protobuf:"bytes,1,opt,name=task_port_id,json=taskPortId,proto3" json:"task_port_id,omitempty"`
+	Details       []*Task                `protobuf:"bytes,2,rep,name=details,proto3" json:"details,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *HeartingRequest) Reset() {
-	*x = HeartingRequest{}
-	mi := &file_controller_proto_msgTypes[2]
+func (x *TaskReportRequest) Reset() {
+	*x = TaskReportRequest{}
+	mi := &file_controller_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *HeartingRequest) String() string {
+func (x *TaskReportRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HeartingRequest) ProtoMessage() {}
+func (*TaskReportRequest) ProtoMessage() {}
 
-func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[2]
+func (x *TaskReportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_controller_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -182,82 +130,41 @@ func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HeartingRequest.ProtoReflect.Descriptor instead.
-func (*HeartingRequest) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{2}
+// Deprecated: Use TaskReportRequest.ProtoReflect.Descriptor instead.
+func (*TaskReportRequest) Descriptor() ([]byte, []int) {
+	return file_controller_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *HeartingRequest) GetIp() string {
+func (x *TaskReportRequest) GetTaskPortId() string {
 	if x != nil {
-		return x.Ip
+		return x.TaskPortId
 	}
 	return ""
 }
 
-func (x *HeartingRequest) GetStatus() *Status {
+func (x *TaskReportRequest) GetDetails() []*Task {
 	if x != nil {
-		return x.Status
+		return x.Details
 	}
 	return nil
-}
-
-type HeartingResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *HeartingResponse) Reset() {
-	*x = HeartingResponse{}
-	mi := &file_controller_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *HeartingResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*HeartingResponse) ProtoMessage() {}
-
-func (x *HeartingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_controller_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use HeartingResponse.ProtoReflect.Descriptor instead.
-func (*HeartingResponse) Descriptor() ([]byte, []int) {
-	return file_controller_proto_rawDescGZIP(), []int{3}
 }
 
 var File_controller_proto protoreflect.FileDescriptor
 
 const file_controller_proto_rawDesc = "" +
 	"\n" +
-	"\x10controller.proto\x12\x12controller_service\"\xcc\x01\n" +
-	"\x06Status\x12\x1b\n" +
-	"\tcpu_usage\x18\x01 \x01(\x02R\bcpuUsage\x12\x1b\n" +
-	"\tcpu_cores\x18\x02 \x01(\x05R\bcpuCores\x12#\n" +
-	"\rcpu_frequency\x18\x03 \x01(\x02R\fcpuFrequency\x12!\n" +
-	"\fmemory_usage\x18\x04 \x01(\x02R\vmemoryUsage\x12!\n" +
-	"\fmemory_total\x18\x05 \x01(\x02R\vmemoryTotal\x12\x1d\n" +
+	"\x10controller.proto\x12\x1bcontroller_2_worker_service\"\x9e\x01\n" +
+	"\x04Task\x12\x1b\n" +
+	"\ttask_type\x18\x01 \x01(\x05R\btaskType\x12\x1d\n" +
 	"\n" +
-	"task_count\x18\x06 \x01(\x05R\ttaskCount\"H\n" +
-	"\x0eRepeatedStatus\x126\n" +
-	"\bstatuses\x18\x01 \x03(\v2\x1a.controller_service.StatusR\bstatuses\"U\n" +
-	"\x0fHeartingRequest\x12\x0e\n" +
-	"\x02ip\x18\x01 \x01(\tR\x02ip\x122\n" +
-	"\x06status\x18\x02 \x01(\v2\x1a.controller_service.StatusR\x06status\"\x12\n" +
-	"\x10HeartingResponse2l\n" +
-	"\x13BranderWorkerStatus\x12U\n" +
-	"\bHearting\x12#.controller_service.HeartingRequest\x1a$.controller_service.HeartingResponseB1Z/script/rpc_server/controller;controller_serviceb\x06proto3"
+	"task_level\x18\x02 \x01(\x05R\ttaskLevel\x12#\n" +
+	"\rtask_priority\x18\x03 \x01(\x05R\ftaskPriority\x12\x1b\n" +
+	"\ttask_data\x18\x04 \x01(\fR\btaskData\x12\x18\n" +
+	"\asuccess\x18\x05 \x01(\bR\asuccess\"r\n" +
+	"\x11TaskReportRequest\x12 \n" +
+	"\ftask_port_id\x18\x01 \x01(\tR\n" +
+	"taskPortId\x12;\n" +
+	"\adetails\x18\x02 \x03(\v2!.controller_2_worker_service.TaskR\adetailsB:Z8script/rpc_server/controller;controller_2_worker_serviceb\x06proto3"
 
 var (
 	file_controller_proto_rawDescOnce sync.Once
@@ -271,23 +178,18 @@ func file_controller_proto_rawDescGZIP() []byte {
 	return file_controller_proto_rawDescData
 }
 
-var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_controller_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_controller_proto_goTypes = []any{
-	(*Status)(nil),           // 0: controller_service.Status
-	(*RepeatedStatus)(nil),   // 1: controller_service.RepeatedStatus
-	(*HeartingRequest)(nil),  // 2: controller_service.HeartingRequest
-	(*HeartingResponse)(nil), // 3: controller_service.HeartingResponse
+	(*Task)(nil),              // 0: controller_2_worker_service.Task
+	(*TaskReportRequest)(nil), // 1: controller_2_worker_service.TaskReportRequest
 }
 var file_controller_proto_depIdxs = []int32{
-	0, // 0: controller_service.RepeatedStatus.statuses:type_name -> controller_service.Status
-	0, // 1: controller_service.HeartingRequest.status:type_name -> controller_service.Status
-	2, // 2: controller_service.BranderWorkerStatus.Hearting:input_type -> controller_service.HeartingRequest
-	3, // 3: controller_service.BranderWorkerStatus.Hearting:output_type -> controller_service.HeartingResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 0: controller_2_worker_service.TaskReportRequest.details:type_name -> controller_2_worker_service.Task
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_controller_proto_init() }
@@ -301,9 +203,9 @@ func file_controller_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_controller_proto_rawDesc), len(file_controller_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   2,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   0,
 		},
 		GoTypes:           file_controller_proto_goTypes,
 		DependencyIndexes: file_controller_proto_depIdxs,

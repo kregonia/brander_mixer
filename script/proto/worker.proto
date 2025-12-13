@@ -1,6 +1,6 @@
 syntax = "proto3";
-package worker_service;
-option go_package = "script/rpc_server/worker;worker_service";
+package worker_2_controller_service;
+option go_package = "script/rpc_server/worker;worker_2_controller_service";
 
 message RegistRequest {
   string worker_id = 1;
@@ -14,6 +14,7 @@ message RegistResponse {
 
 service Worker2Controller {
   rpc RegistWorker(RegistRequest) returns (RegistResponse);
+  rpc Hearting(HeartingRequest) returns (HeartingResponse);
   rpc ReportTaskStatus(TaskReportRequest) returns (TaskReportResponse);
 }
 
@@ -21,16 +22,13 @@ message Task{
   int32 task_type = 1;
   int32 task_level = 2;
   int32 task_priority = 3;
-  int32 decode_type = 4;
-  bytes task_data = 5;
-  bool success = 6;
+  bytes task_data = 4;
+  bool success = 5;
 }
 
-// status: "0:undo", "1:in_progress", "2:completed", "3:some_failed", "4:all_failed"
 message TaskReportRequest {
-  string task_id = 1;
-  int32 status = 2;
-  repeated Task detail = 3;
+  string task_port_id = 1;
+  repeated Task details = 2;
 }
 
 message TaskDistribution {
@@ -41,5 +39,26 @@ message TaskDistribution {
 message TaskReportResponse {
   bool received = 1;
   repeated TaskDistribution tasks = 2;
+}
+
+message Status {
+  float cpu_usage = 1;
+  int32 cpu_cores = 2;
+  float cpu_frequency = 3;
+  float memory_usage = 4;
+  float memory_total = 5;
+  int32 task_count = 6;
+}
+
+message RepeatedStatus {
+  repeated Status statuses = 1;
+}
+
+message HeartingRequest {
+  string ip = 1;
+  Status status = 2;
+}
+
+message HeartingResponse {
 }
 

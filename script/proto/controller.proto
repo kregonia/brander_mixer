@@ -1,29 +1,17 @@
 syntax = "proto3";
 
-package controller_service;
-option go_package = "script/rpc_server/controller;controller_service";
+package controller_2_worker_service;
+option go_package = "script/rpc_server/controller;controller_2_worker_service";
 
-message Status {
-  float cpu_usage = 1;
-  int32 cpu_cores = 2;
-  float cpu_frequency = 3;
-  float memory_usage = 4;
-  float memory_total = 5;
-  int32 task_count = 6;
+message Task{
+  int32 task_type = 1;
+  int32 task_level = 2;
+  int32 task_priority = 3;
+  bytes task_data = 4;
+  bool success = 5;
 }
 
-message RepeatedStatus {
-  repeated Status statuses = 1;
-}
-
-message HeartingRequest {
-  string ip = 1;
-  Status status = 2;
-}
-
-message HeartingResponse {
-}
-
-service BranderWorkerStatus {
-  rpc Hearting(HeartingRequest) returns (HeartingResponse);
+message TaskReportRequest {
+  string task_port_id = 1;
+  repeated Task details = 2;
 }

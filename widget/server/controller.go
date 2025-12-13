@@ -4,19 +4,19 @@ import (
 	"context"
 	"log"
 	"net"
-	"sync"
 
-	controller_service "github.com/kregonia/brander_mixer/script/rpc_server/controller"
+	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
+	"github.com/kregonia/brander_mixer/widget/holder"
 	"google.golang.org/grpc"
 )
 
 type ControllerServer struct {
-	controller_service.BranderWorkerStatusServer
-	M sync.Map
+	worker_2_controller_service.Worker2ControllerServer
+	HD holder.StatusHolder
 }
 
 var (
-	ControllerServerInstance = &ControllerServer{M: sync.Map{}}
+	ControllerServerInstance = &ControllerServer{HD: *holder.NewStatusHolder()}
 )
 
 func ControllerServering(port string) {
@@ -28,7 +28,7 @@ func ControllerServering(port string) {
 	// 创建gRPC服务器实例
 	s := grpc.NewServer()
 	// 注册我们的服务实现到gRPC服务器
-	controller_service.RegisterBranderWorkerStatusServer(s, ControllerServerInstance)
+	worker_2_controller_service.RegisterWorker2ControllerServer(s, ControllerServerInstance)
 	log.Println("gRPC server listening on port " + port)
 
 	// 阻塞等待，直到进程被杀死或调用 `Stop`
@@ -37,7 +37,8 @@ func ControllerServering(port string) {
 	}
 }
 
-func (s *ControllerServer) Hearting(context.Context, *controller_service.HeartingRequest) (*controller_service.HeartingResponse, error) {
+func (s *ControllerServer) Hearting(ctx context.Context, req *worker_2_controller_service.HeartingRequest) (*worker_2_controller_service.HeartingResponse, error) {
 	// todo: 维护status状态集
-	return &controller_service.HeartingResponse{}, nil
+	s.HD.AppendStatusByKey(req.Ip, req.GetStatus())
+	return &worker_2_controller_service.HeartingResponse{}, nil
 }

@@ -8,9 +8,8 @@ import (
 	"io"
 	"os"
 
+	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
 	"google.golang.org/protobuf/proto"
-
-	controller_service "github.com/kregonia/brander_mixer/script/rpc_server/controller"
 )
 
 func main() {
@@ -74,7 +73,7 @@ func decodeToTxt(input, output string) error {
 		offset += length
 
 		// 3️⃣ protobuf 解码
-		var rs controller_service.RepeatedStatus
+		var rs worker_2_controller_service.RepeatedStatus
 		if err := proto.Unmarshal(data, &rs); err != nil {
 			return fmt.Errorf("unmarshal failed at batch %d: %w", batchIdx, err)
 		}

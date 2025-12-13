@@ -4,14 +4,14 @@ import (
 	"context"
 	"log"
 
-	worker_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
+	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type ControllerClient struct {
 	conn   *grpc.ClientConn
-	client worker_service.Worker2ControllerClient
+	client worker_2_controller_service.Worker2ControllerClient
 }
 
 func InitWorkerConnection(target string) *ControllerClient {
@@ -19,7 +19,7 @@ func InitWorkerConnection(target string) *ControllerClient {
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	client := worker_service.NewWorker2ControllerClient(conn)
+	client := worker_2_controller_service.NewWorker2ControllerClient(conn)
 	return &ControllerClient{
 		conn:   conn,
 		client: client,
@@ -31,7 +31,7 @@ func (cc *ControllerClient) Close() {
 	}
 }
 
-func (cc *ControllerClient) GetClient() worker_service.Worker2ControllerClient {
+func (cc *ControllerClient) GetClient() worker_2_controller_service.Worker2ControllerClient {
 	return cc.client
 }
 
@@ -39,18 +39,10 @@ func (cc *ControllerClient) GetConn() *grpc.ClientConn {
 	return cc.conn
 }
 
-func (cc *ControllerClient) RegistWorker2Controller(ctx context.Context, workerID string, password string) *worker_service.RegistResponse {
-	response, err := cc.client.RegistWorker(ctx, &worker_service.RegistRequest{WorkerId: workerID, Password: password})
+func (cc *ControllerClient) RegistWorker2Controller(ctx context.Context, workerID string, password string) *worker_2_controller_service.RegistResponse {
+	response, err := cc.client.RegistWorker(ctx, &worker_2_controller_service.RegistRequest{WorkerId: workerID, Password: password})
 	if err != nil {
 		log.Fatalf("could not get worker status: %v", err)
 	}
 	return response
-}
-
-func (cc *ControllerClient) ReportTasks(ctx context.Context, req *worker_service.TaskReportRequest) (*worker_service.TaskReportResponse, error) {
-	response, err := cc.client.ReportTaskStatus(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return response, nil
 }

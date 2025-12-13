@@ -4,7 +4,7 @@
 // - protoc             v6.32.1
 // source: worker.proto
 
-package worker_service
+package worker_2_controller_service
 
 import (
 	context "context"
@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Worker2Controller_RegistWorker_FullMethodName     = "/worker_service.Worker2Controller/RegistWorker"
-	Worker2Controller_ReportTaskStatus_FullMethodName = "/worker_service.Worker2Controller/ReportTaskStatus"
+	Worker2Controller_RegistWorker_FullMethodName     = "/worker_2_controller_service.Worker2Controller/RegistWorker"
+	Worker2Controller_Hearting_FullMethodName         = "/worker_2_controller_service.Worker2Controller/Hearting"
+	Worker2Controller_ReportTaskStatus_FullMethodName = "/worker_2_controller_service.Worker2Controller/ReportTaskStatus"
 )
 
 // Worker2ControllerClient is the client API for Worker2Controller service.
@@ -28,6 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type Worker2ControllerClient interface {
 	RegistWorker(ctx context.Context, in *RegistRequest, opts ...grpc.CallOption) (*RegistResponse, error)
+	Hearting(ctx context.Context, in *HeartingRequest, opts ...grpc.CallOption) (*HeartingResponse, error)
 	ReportTaskStatus(ctx context.Context, in *TaskReportRequest, opts ...grpc.CallOption) (*TaskReportResponse, error)
 }
 
@@ -49,6 +51,16 @@ func (c *worker2ControllerClient) RegistWorker(ctx context.Context, in *RegistRe
 	return out, nil
 }
 
+func (c *worker2ControllerClient) Hearting(ctx context.Context, in *HeartingRequest, opts ...grpc.CallOption) (*HeartingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HeartingResponse)
+	err := c.cc.Invoke(ctx, Worker2Controller_Hearting_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *worker2ControllerClient) ReportTaskStatus(ctx context.Context, in *TaskReportRequest, opts ...grpc.CallOption) (*TaskReportResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TaskReportResponse)
@@ -64,6 +76,7 @@ func (c *worker2ControllerClient) ReportTaskStatus(ctx context.Context, in *Task
 // for forward compatibility.
 type Worker2ControllerServer interface {
 	RegistWorker(context.Context, *RegistRequest) (*RegistResponse, error)
+	Hearting(context.Context, *HeartingRequest) (*HeartingResponse, error)
 	ReportTaskStatus(context.Context, *TaskReportRequest) (*TaskReportResponse, error)
 	mustEmbedUnimplementedWorker2ControllerServer()
 }
@@ -77,6 +90,9 @@ type UnimplementedWorker2ControllerServer struct{}
 
 func (UnimplementedWorker2ControllerServer) RegistWorker(context.Context, *RegistRequest) (*RegistResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegistWorker not implemented")
+}
+func (UnimplementedWorker2ControllerServer) Hearting(context.Context, *HeartingRequest) (*HeartingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Hearting not implemented")
 }
 func (UnimplementedWorker2ControllerServer) ReportTaskStatus(context.Context, *TaskReportRequest) (*TaskReportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportTaskStatus not implemented")
@@ -120,6 +136,24 @@ func _Worker2Controller_RegistWorker_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Worker2Controller_Hearting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HeartingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(Worker2ControllerServer).Hearting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Worker2Controller_Hearting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(Worker2ControllerServer).Hearting(ctx, req.(*HeartingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Worker2Controller_ReportTaskStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TaskReportRequest)
 	if err := dec(in); err != nil {
@@ -142,12 +176,16 @@ func _Worker2Controller_ReportTaskStatus_Handler(srv interface{}, ctx context.Co
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Worker2Controller_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "worker_service.Worker2Controller",
+	ServiceName: "worker_2_controller_service.Worker2Controller",
 	HandlerType: (*Worker2ControllerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "RegistWorker",
 			Handler:    _Worker2Controller_RegistWorker_Handler,
+		},
+		{
+			MethodName: "Hearting",
+			Handler:    _Worker2Controller_Hearting_Handler,
 		},
 		{
 			MethodName: "ReportTaskStatus",
