@@ -22,6 +22,7 @@ brander mixer 是一个任务系统，用于在复杂字符分割后在边缘设
 - protoc-gen-go
 - protoc-gen-go-grpc
 - protobuf@3
+- protoc-gen-grpc-gateway
 
 ### 安装步骤
 
@@ -34,6 +35,11 @@ go mod tidy
 
 2. 安装依赖
 ```bash
+// 必要工具链
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+
 cd brander_mixer
 make prepare
 make build

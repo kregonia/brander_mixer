@@ -9,14 +9,14 @@ import (
 
 	logger "github.com/kregonia/brander_mixer/log"
 	worker_2_controller_service "github.com/kregonia/brander_mixer/script/rpc_server/worker"
+	"github.com/kregonia/brander_mixer/widget/parameter"
 	"google.golang.org/protobuf/proto"
 )
 
 const (
-	filePrefix            = "status_log_"
-	timeStampDataFolder   = "./data/timestamp/"
-	defaultTimeDifference = 60 // 默认刷新时间，单位秒
-	defaultRefreshTimes   = 10 // 默认刷新次数
+	filePrefix          = "status_log_"
+	timeStampDataFolder = "./data/timestamp/"
+	defaultRefreshTimes = 10 // 默认刷新次数
 )
 
 var (
@@ -41,7 +41,7 @@ func NewStatusSlice(beginTimeStamp int64, refreshTimes uint, file *os.File) *Sta
 	return &StatusSlice{
 		file:                file,
 		BeginTimestamp:      beginTimeStamp,
-		TimeDifference:      defaultTimeDifference * int64(time.Second),
+		TimeDifference:      int64(parameter.DefaultIntervalSeconds) * int64(time.Second),
 		Status:              worker_2_controller_service.RepeatedStatus{Statuses: make([]*worker_2_controller_service.Status, 0)},
 		refreshTimes:        refreshTimes,
 		defaultRefreshTimes: refreshTimes,
@@ -129,13 +129,18 @@ func (sh *StatusHolder) CopyByKey(key string) *StatusSlice {
 	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes, value.(*StatusSlice).file)
 	copyValue.Lock()
 	for _, status := range value.(*StatusSlice).Status.Statuses {
+		cpuUsages := make([]float64, len(status.CpuUsagePercents))
+		copy(cpuUsages, status.CpuUsagePercents)
 		copyStatus := &worker_2_controller_service.Status{
-			CpuUsage:     status.CpuUsage,
-			CpuCores:     status.CpuCores,
-			CpuFrequency: status.CpuFrequency,
-			MemoryUsage:  status.MemoryUsage,
-			MemoryTotal:  status.MemoryTotal,
-			TaskCount:    status.TaskCount,
+			CpuLogicalCores:    status.CpuLogicalCores,
+			CpuUsagePercents:   cpuUsages,
+			MemoryUsagePercent: status.MemoryUsagePercent,
+			MemoryTotal:        status.MemoryTotal,
+			TaskCount:          status.TaskCount,
+			DiskUsagePercent:   status.DiskUsagePercent,
+			DiskTotal:          status.DiskTotal,
+			DiskReadBytes:      status.DiskReadBytes,
+			DiskWriteBytes:     status.DiskWriteBytes,
 		}
 		copyValue.Status.Statuses = append(copyValue.Status.Statuses, copyStatus)
 	}

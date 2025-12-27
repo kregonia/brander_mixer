@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 
@@ -39,6 +40,12 @@ func ControllerServering(port string) {
 
 func (s *ControllerServer) Hearting(ctx context.Context, req *worker_2_controller_service.HeartingRequest) (*worker_2_controller_service.HeartingResponse, error) {
 	// todo: 维护status状态集
+	fmt.Println("accept the hearting")
 	s.HD.AppendStatusByKey(req.Ip, req.GetStatus())
 	return &worker_2_controller_service.HeartingResponse{}, nil
+}
+
+func (s *ControllerServer) RegistWorker(ctx context.Context, in *worker_2_controller_service.RegistRequest) (*worker_2_controller_service.RegistResponse, error) {
+	fmt.Println(in.WorkerId)
+	return &worker_2_controller_service.RegistResponse{Success: true}, nil
 }

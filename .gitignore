@@ -4,3 +4,4 @@ bin/
 cmd/demo
 data/
 bin/
+logs/

@@ -5,6 +5,29 @@ option go_package = "script/rpc_server/worker;worker_2_controller_service";
 message RegistRequest {
   string worker_id = 1;
   string password = 2;
+  WorkerInfo info = 3;
+}
+
+message WorkerInfo {
+  // Host
+  string hostname = 1;
+  string os = 2;
+  string platform = 3;
+  string platform_family = 4;
+  string platform_version = 5;
+  string kernel_version = 6;
+  string arch = 7;
+
+  // CPU
+  int32 cpu_logical_cores = 8;
+  int32 cpu_physical_cores = 9;
+  string cpu_model_name = 10;
+
+  // Memory
+  uint64 memory_total = 11;
+
+  // Disk
+  uint64 disk_total = 12;
 }
 
 message RegistResponse {
@@ -42,12 +65,22 @@ message TaskReportResponse {
 }
 
 message Status {
-  float cpu_usage = 1;
-  int32 cpu_cores = 2;
-  float cpu_frequency = 3;
-  float memory_usage = 4;
-  float memory_total = 5;
-  int32 task_count = 6;
+  // CPU
+  int32 cpu_logical_cores = 1;
+  bool super_threading_enabled = 2;
+  repeated double cpu_usage_percents = 3;
+  
+  // Memory
+  double memory_usage_percent = 4;
+  uint64 memory_total = 5;
+
+  // App
+  int32 task_count = 6; 
+  // Disk
+  double disk_usage_percent = 7;
+  uint64 disk_total = 8;
+  int32 disk_read_bytes = 9;
+  int32 disk_write_bytes = 10;
 }
 
 message RepeatedStatus {

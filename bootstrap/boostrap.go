@@ -11,6 +11,8 @@ func Bootstrap(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	<-ctx.Done()
-	logger.CloseAll()
+	go func() {
+		<-ctx.Done()
+		logger.CloseAll()
+	}()
 }
