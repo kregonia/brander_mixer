@@ -23,9 +23,8 @@ const (
 
 type RegistRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkerId      string                 `protobuf:"bytes,1,opt,name=worker_id,json=workerId,proto3" json:"worker_id,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	Info          *WorkerInfo            `protobuf:"bytes,3,opt,name=info,proto3" json:"info,omitempty"`
+	Ip            string                 `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
+	Info          *WorkerInfo            `protobuf:"bytes,2,opt,name=info,proto3" json:"info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,16 +59,9 @@ func (*RegistRequest) Descriptor() ([]byte, []int) {
 	return file_worker_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RegistRequest) GetWorkerId() string {
+func (x *RegistRequest) GetIp() string {
 	if x != nil {
-		return x.WorkerId
-	}
-	return ""
-}
-
-func (x *RegistRequest) GetPassword() string {
-	if x != nil {
-		return x.Password
+		return x.Ip
 	}
 	return ""
 }
@@ -87,20 +79,15 @@ type WorkerInfo struct {
 	Hostname        string `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
 	Os              string `protobuf:"bytes,2,opt,name=os,proto3" json:"os,omitempty"`
 	Platform        string `protobuf:"bytes,3,opt,name=platform,proto3" json:"platform,omitempty"`
-	PlatformFamily  string `protobuf:"bytes,4,opt,name=platform_family,json=platformFamily,proto3" json:"platform_family,omitempty"`
-	PlatformVersion string `protobuf:"bytes,5,opt,name=platform_version,json=platformVersion,proto3" json:"platform_version,omitempty"`
-	KernelVersion   string `protobuf:"bytes,6,opt,name=kernel_version,json=kernelVersion,proto3" json:"kernel_version,omitempty"`
-	Arch            string `protobuf:"bytes,7,opt,name=arch,proto3" json:"arch,omitempty"`
+	PlatformVersion string `protobuf:"bytes,4,opt,name=platform_version,json=platformVersion,proto3" json:"platform_version,omitempty"`
+	KernelVersion   string `protobuf:"bytes,5,opt,name=kernel_version,json=kernelVersion,proto3" json:"kernel_version,omitempty"`
+	Arch            string `protobuf:"bytes,6,opt,name=arch,proto3" json:"arch,omitempty"`
 	// CPU
 	CpuLogicalCores  int32  `protobuf:"varint,8,opt,name=cpu_logical_cores,json=cpuLogicalCores,proto3" json:"cpu_logical_cores,omitempty"`
 	CpuPhysicalCores int32  `protobuf:"varint,9,opt,name=cpu_physical_cores,json=cpuPhysicalCores,proto3" json:"cpu_physical_cores,omitempty"`
 	CpuModelName     string `protobuf:"bytes,10,opt,name=cpu_model_name,json=cpuModelName,proto3" json:"cpu_model_name,omitempty"`
-	// Memory
-	MemoryTotal uint64 `protobuf:"varint,11,opt,name=memory_total,json=memoryTotal,proto3" json:"memory_total,omitempty"`
-	// Disk
-	DiskTotal     uint64 `protobuf:"varint,12,opt,name=disk_total,json=diskTotal,proto3" json:"disk_total,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *WorkerInfo) Reset() {
@@ -154,13 +141,6 @@ func (x *WorkerInfo) GetPlatform() string {
 	return ""
 }
 
-func (x *WorkerInfo) GetPlatformFamily() string {
-	if x != nil {
-		return x.PlatformFamily
-	}
-	return ""
-}
-
 func (x *WorkerInfo) GetPlatformVersion() string {
 	if x != nil {
 		return x.PlatformVersion
@@ -201,20 +181,6 @@ func (x *WorkerInfo) GetCpuModelName() string {
 		return x.CpuModelName
 	}
 	return ""
-}
-
-func (x *WorkerInfo) GetMemoryTotal() uint64 {
-	if x != nil {
-		return x.MemoryTotal
-	}
-	return 0
-}
-
-func (x *WorkerInfo) GetDiskTotal() uint64 {
-	if x != nil {
-		return x.DiskTotal
-	}
-	return 0
 }
 
 type RegistResponse struct {
@@ -501,29 +467,265 @@ func (x *TaskReportResponse) GetTasks() []*TaskDistribution {
 	return nil
 }
 
-type Status struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// CPU
-	CpuLogicalCores       int32     `protobuf:"varint,1,opt,name=cpu_logical_cores,json=cpuLogicalCores,proto3" json:"cpu_logical_cores,omitempty"`
-	SuperThreadingEnabled bool      `protobuf:"varint,2,opt,name=super_threading_enabled,json=superThreadingEnabled,proto3" json:"super_threading_enabled,omitempty"`
-	CpuUsagePercents      []float64 `protobuf:"fixed64,3,rep,packed,name=cpu_usage_percents,json=cpuUsagePercents,proto3" json:"cpu_usage_percents,omitempty"`
-	// Memory
-	MemoryUsagePercent float64 `protobuf:"fixed64,4,opt,name=memory_usage_percent,json=memoryUsagePercent,proto3" json:"memory_usage_percent,omitempty"`
-	MemoryTotal        uint64  `protobuf:"varint,5,opt,name=memory_total,json=memoryTotal,proto3" json:"memory_total,omitempty"`
-	// App
-	TaskCount int32 `protobuf:"varint,6,opt,name=task_count,json=taskCount,proto3" json:"task_count,omitempty"`
-	// Disk
-	DiskUsagePercent float64 `protobuf:"fixed64,7,opt,name=disk_usage_percent,json=diskUsagePercent,proto3" json:"disk_usage_percent,omitempty"`
-	DiskTotal        uint64  `protobuf:"varint,8,opt,name=disk_total,json=diskTotal,proto3" json:"disk_total,omitempty"`
-	DiskReadBytes    int32   `protobuf:"varint,9,opt,name=disk_read_bytes,json=diskReadBytes,proto3" json:"disk_read_bytes,omitempty"`
-	DiskWriteBytes   int32   `protobuf:"varint,10,opt,name=disk_write_bytes,json=diskWriteBytes,proto3" json:"disk_write_bytes,omitempty"`
+type CpuInfo struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	CpuLogicalCores       int32                  `protobuf:"varint,1,opt,name=cpu_logical_cores,json=cpuLogicalCores,proto3" json:"cpu_logical_cores,omitempty"`
+	SuperThreadingEnabled bool                   `protobuf:"varint,2,opt,name=super_threading_enabled,json=superThreadingEnabled,proto3" json:"super_threading_enabled,omitempty"`
+	CpuUsagePercents      []float64              `protobuf:"fixed64,3,rep,packed,name=cpu_usage_percents,json=cpuUsagePercents,proto3" json:"cpu_usage_percents,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *CpuInfo) Reset() {
+	*x = CpuInfo{}
+	mi := &file_worker_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CpuInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CpuInfo) ProtoMessage() {}
+
+func (x *CpuInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CpuInfo.ProtoReflect.Descriptor instead.
+func (*CpuInfo) Descriptor() ([]byte, []int) {
+	return file_worker_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CpuInfo) GetCpuLogicalCores() int32 {
+	if x != nil {
+		return x.CpuLogicalCores
+	}
+	return 0
+}
+
+func (x *CpuInfo) GetSuperThreadingEnabled() bool {
+	if x != nil {
+		return x.SuperThreadingEnabled
+	}
+	return false
+}
+
+func (x *CpuInfo) GetCpuUsagePercents() []float64 {
+	if x != nil {
+		return x.CpuUsagePercents
+	}
+	return nil
+}
+
+type MemoryInfo struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	MemoryUsagePercent float64                `protobuf:"fixed64,1,opt,name=memory_usage_percent,json=memoryUsagePercent,proto3" json:"memory_usage_percent,omitempty"`
+	MemoryTotal        uint64                 `protobuf:"varint,2,opt,name=memory_total,json=memoryTotal,proto3" json:"memory_total,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *MemoryInfo) Reset() {
+	*x = MemoryInfo{}
+	mi := &file_worker_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MemoryInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MemoryInfo) ProtoMessage() {}
+
+func (x *MemoryInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MemoryInfo.ProtoReflect.Descriptor instead.
+func (*MemoryInfo) Descriptor() ([]byte, []int) {
+	return file_worker_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *MemoryInfo) GetMemoryUsagePercent() float64 {
+	if x != nil {
+		return x.MemoryUsagePercent
+	}
+	return 0
+}
+
+func (x *MemoryInfo) GetMemoryTotal() uint64 {
+	if x != nil {
+		return x.MemoryTotal
+	}
+	return 0
+}
+
+type DiskInfo struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	DiskUsagePercent float64                `protobuf:"fixed64,1,opt,name=disk_usage_percent,json=diskUsagePercent,proto3" json:"disk_usage_percent,omitempty"`
+	DiskTotal        uint64                 `protobuf:"varint,2,opt,name=disk_total,json=diskTotal,proto3" json:"disk_total,omitempty"`
+	DiskReadBytes    int32                  `protobuf:"varint,3,opt,name=disk_read_bytes,json=diskReadBytes,proto3" json:"disk_read_bytes,omitempty"`
+	DiskWriteBytes   int32                  `protobuf:"varint,4,opt,name=disk_write_bytes,json=diskWriteBytes,proto3" json:"disk_write_bytes,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
 
+func (x *DiskInfo) Reset() {
+	*x = DiskInfo{}
+	mi := &file_worker_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiskInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiskInfo) ProtoMessage() {}
+
+func (x *DiskInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiskInfo.ProtoReflect.Descriptor instead.
+func (*DiskInfo) Descriptor() ([]byte, []int) {
+	return file_worker_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DiskInfo) GetDiskUsagePercent() float64 {
+	if x != nil {
+		return x.DiskUsagePercent
+	}
+	return 0
+}
+
+func (x *DiskInfo) GetDiskTotal() uint64 {
+	if x != nil {
+		return x.DiskTotal
+	}
+	return 0
+}
+
+func (x *DiskInfo) GetDiskReadBytes() int32 {
+	if x != nil {
+		return x.DiskReadBytes
+	}
+	return 0
+}
+
+func (x *DiskInfo) GetDiskWriteBytes() int32 {
+	if x != nil {
+		return x.DiskWriteBytes
+	}
+	return 0
+}
+
+type NetworkInfo struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	InterfaceName        string                 `protobuf:"bytes,1,opt,name=interface_name,json=interfaceName,proto3" json:"interface_name,omitempty"`
+	NetworkSentBytes     int32                  `protobuf:"varint,2,opt,name=network_sent_bytes,json=networkSentBytes,proto3" json:"network_sent_bytes,omitempty"`
+	NetworkReceivedBytes int32                  `protobuf:"varint,3,opt,name=network_received_bytes,json=networkReceivedBytes,proto3" json:"network_received_bytes,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *NetworkInfo) Reset() {
+	*x = NetworkInfo{}
+	mi := &file_worker_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkInfo) ProtoMessage() {}
+
+func (x *NetworkInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_worker_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkInfo.ProtoReflect.Descriptor instead.
+func (*NetworkInfo) Descriptor() ([]byte, []int) {
+	return file_worker_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *NetworkInfo) GetInterfaceName() string {
+	if x != nil {
+		return x.InterfaceName
+	}
+	return ""
+}
+
+func (x *NetworkInfo) GetNetworkSentBytes() int32 {
+	if x != nil {
+		return x.NetworkSentBytes
+	}
+	return 0
+}
+
+func (x *NetworkInfo) GetNetworkReceivedBytes() int32 {
+	if x != nil {
+		return x.NetworkReceivedBytes
+	}
+	return 0
+}
+
+type Status struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// CPU
+	Cpu *CpuInfo `protobuf:"bytes,1,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	// Memory
+	Memory *MemoryInfo `protobuf:"bytes,2,opt,name=memory,proto3" json:"memory,omitempty"`
+	// Disk
+	Disk *DiskInfo `protobuf:"bytes,3,opt,name=disk,proto3" json:"disk,omitempty"`
+	// Network
+	Network *NetworkInfo `protobuf:"bytes,4,opt,name=network,proto3" json:"network,omitempty"`
+	// App
+	TaskCount     int32 `protobuf:"varint,5,opt,name=task_count,json=taskCount,proto3" json:"task_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
 func (x *Status) Reset() {
 	*x = Status{}
-	mi := &file_worker_proto_msgTypes[7]
+	mi := &file_worker_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -535,7 +737,7 @@ func (x *Status) String() string {
 func (*Status) ProtoMessage() {}
 
 func (x *Status) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_proto_msgTypes[7]
+	mi := &file_worker_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -548,75 +750,40 @@ func (x *Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Status.ProtoReflect.Descriptor instead.
 func (*Status) Descriptor() ([]byte, []int) {
-	return file_worker_proto_rawDescGZIP(), []int{7}
+	return file_worker_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *Status) GetCpuLogicalCores() int32 {
+func (x *Status) GetCpu() *CpuInfo {
 	if x != nil {
-		return x.CpuLogicalCores
-	}
-	return 0
-}
-
-func (x *Status) GetSuperThreadingEnabled() bool {
-	if x != nil {
-		return x.SuperThreadingEnabled
-	}
-	return false
-}
-
-func (x *Status) GetCpuUsagePercents() []float64 {
-	if x != nil {
-		return x.CpuUsagePercents
+		return x.Cpu
 	}
 	return nil
 }
 
-func (x *Status) GetMemoryUsagePercent() float64 {
+func (x *Status) GetMemory() *MemoryInfo {
 	if x != nil {
-		return x.MemoryUsagePercent
+		return x.Memory
 	}
-	return 0
+	return nil
 }
 
-func (x *Status) GetMemoryTotal() uint64 {
+func (x *Status) GetDisk() *DiskInfo {
 	if x != nil {
-		return x.MemoryTotal
+		return x.Disk
 	}
-	return 0
+	return nil
+}
+
+func (x *Status) GetNetwork() *NetworkInfo {
+	if x != nil {
+		return x.Network
+	}
+	return nil
 }
 
 func (x *Status) GetTaskCount() int32 {
 	if x != nil {
 		return x.TaskCount
-	}
-	return 0
-}
-
-func (x *Status) GetDiskUsagePercent() float64 {
-	if x != nil {
-		return x.DiskUsagePercent
-	}
-	return 0
-}
-
-func (x *Status) GetDiskTotal() uint64 {
-	if x != nil {
-		return x.DiskTotal
-	}
-	return 0
-}
-
-func (x *Status) GetDiskReadBytes() int32 {
-	if x != nil {
-		return x.DiskReadBytes
-	}
-	return 0
-}
-
-func (x *Status) GetDiskWriteBytes() int32 {
-	if x != nil {
-		return x.DiskWriteBytes
 	}
 	return 0
 }
@@ -630,7 +797,7 @@ type RepeatedStatus struct {
 
 func (x *RepeatedStatus) Reset() {
 	*x = RepeatedStatus{}
-	mi := &file_worker_proto_msgTypes[8]
+	mi := &file_worker_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -642,7 +809,7 @@ func (x *RepeatedStatus) String() string {
 func (*RepeatedStatus) ProtoMessage() {}
 
 func (x *RepeatedStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_proto_msgTypes[8]
+	mi := &file_worker_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +822,7 @@ func (x *RepeatedStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RepeatedStatus.ProtoReflect.Descriptor instead.
 func (*RepeatedStatus) Descriptor() ([]byte, []int) {
-	return file_worker_proto_rawDescGZIP(), []int{8}
+	return file_worker_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *RepeatedStatus) GetStatuses() []*Status {
@@ -668,14 +835,15 @@ func (x *RepeatedStatus) GetStatuses() []*Status {
 type HeartingRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ip            string                 `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
-	Status        *Status                `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Secret        string                 `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`
+	Status        *Status                `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HeartingRequest) Reset() {
 	*x = HeartingRequest{}
-	mi := &file_worker_proto_msgTypes[9]
+	mi := &file_worker_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -687,7 +855,7 @@ func (x *HeartingRequest) String() string {
 func (*HeartingRequest) ProtoMessage() {}
 
 func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_proto_msgTypes[9]
+	mi := &file_worker_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -700,12 +868,19 @@ func (x *HeartingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartingRequest.ProtoReflect.Descriptor instead.
 func (*HeartingRequest) Descriptor() ([]byte, []int) {
-	return file_worker_proto_rawDescGZIP(), []int{9}
+	return file_worker_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *HeartingRequest) GetIp() string {
 	if x != nil {
 		return x.Ip
+	}
+	return ""
+}
+
+func (x *HeartingRequest) GetSecret() string {
+	if x != nil {
+		return x.Secret
 	}
 	return ""
 }
@@ -719,13 +894,14 @@ func (x *HeartingRequest) GetStatus() *Status {
 
 type HeartingResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HeartingResponse) Reset() {
 	*x = HeartingResponse{}
-	mi := &file_worker_proto_msgTypes[10]
+	mi := &file_worker_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -737,7 +913,7 @@ func (x *HeartingResponse) String() string {
 func (*HeartingResponse) ProtoMessage() {}
 
 func (x *HeartingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_worker_proto_msgTypes[10]
+	mi := &file_worker_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -750,34 +926,36 @@ func (x *HeartingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HeartingResponse.ProtoReflect.Descriptor instead.
 func (*HeartingResponse) Descriptor() ([]byte, []int) {
-	return file_worker_proto_rawDescGZIP(), []int{10}
+	return file_worker_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *HeartingResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
 }
 
 var File_worker_proto protoreflect.FileDescriptor
 
 const file_worker_proto_rawDesc = "" +
 	"\n" +
-	"\fworker.proto\x12\x1bworker_2_controller_service\"\x85\x01\n" +
-	"\rRegistRequest\x12\x1b\n" +
-	"\tworker_id\x18\x01 \x01(\tR\bworkerId\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x12;\n" +
-	"\x04info\x18\x03 \x01(\v2'.worker_2_controller_service.WorkerInfoR\x04info\"\xa5\x03\n" +
+	"\fworker.proto\x12\x1bworker_2_controller_service\"\\\n" +
+	"\rRegistRequest\x12\x0e\n" +
+	"\x02ip\x18\x01 \x01(\tR\x02ip\x12;\n" +
+	"\x04info\x18\x02 \x01(\v2'.worker_2_controller_service.WorkerInfoR\x04info\"\xba\x02\n" +
 	"\n" +
 	"WorkerInfo\x12\x1a\n" +
 	"\bhostname\x18\x01 \x01(\tR\bhostname\x12\x0e\n" +
 	"\x02os\x18\x02 \x01(\tR\x02os\x12\x1a\n" +
-	"\bplatform\x18\x03 \x01(\tR\bplatform\x12'\n" +
-	"\x0fplatform_family\x18\x04 \x01(\tR\x0eplatformFamily\x12)\n" +
-	"\x10platform_version\x18\x05 \x01(\tR\x0fplatformVersion\x12%\n" +
-	"\x0ekernel_version\x18\x06 \x01(\tR\rkernelVersion\x12\x12\n" +
-	"\x04arch\x18\a \x01(\tR\x04arch\x12*\n" +
+	"\bplatform\x18\x03 \x01(\tR\bplatform\x12)\n" +
+	"\x10platform_version\x18\x04 \x01(\tR\x0fplatformVersion\x12%\n" +
+	"\x0ekernel_version\x18\x05 \x01(\tR\rkernelVersion\x12\x12\n" +
+	"\x04arch\x18\x06 \x01(\tR\x04arch\x12*\n" +
 	"\x11cpu_logical_cores\x18\b \x01(\x05R\x0fcpuLogicalCores\x12,\n" +
 	"\x12cpu_physical_cores\x18\t \x01(\x05R\x10cpuPhysicalCores\x12$\n" +
 	"\x0ecpu_model_name\x18\n" +
-	" \x01(\tR\fcpuModelName\x12!\n" +
-	"\fmemory_total\x18\v \x01(\x04R\vmemoryTotal\x12\x1d\n" +
-	"\n" +
-	"disk_total\x18\f \x01(\x04R\tdiskTotal\"B\n" +
+	" \x01(\tR\fcpuModelName\"B\n" +
 	"\x0eRegistResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x16\n" +
 	"\x06secret\x18\x02 \x01(\tR\x06secret\"\x9e\x01\n" +
@@ -797,27 +975,40 @@ const file_worker_proto_rawDesc = "" +
 	"\atask_id\x18\x02 \x01(\tR\x06taskId\"u\n" +
 	"\x12TaskReportResponse\x12\x1a\n" +
 	"\breceived\x18\x01 \x01(\bR\breceived\x12C\n" +
-	"\x05tasks\x18\x02 \x03(\v2-.worker_2_controller_service.TaskDistributionR\x05tasks\"\xad\x03\n" +
-	"\x06Status\x12*\n" +
+	"\x05tasks\x18\x02 \x03(\v2-.worker_2_controller_service.TaskDistributionR\x05tasks\"\x9b\x01\n" +
+	"\aCpuInfo\x12*\n" +
 	"\x11cpu_logical_cores\x18\x01 \x01(\x05R\x0fcpuLogicalCores\x126\n" +
 	"\x17super_threading_enabled\x18\x02 \x01(\bR\x15superThreadingEnabled\x12,\n" +
-	"\x12cpu_usage_percents\x18\x03 \x03(\x01R\x10cpuUsagePercents\x120\n" +
-	"\x14memory_usage_percent\x18\x04 \x01(\x01R\x12memoryUsagePercent\x12!\n" +
-	"\fmemory_total\x18\x05 \x01(\x04R\vmemoryTotal\x12\x1d\n" +
+	"\x12cpu_usage_percents\x18\x03 \x03(\x01R\x10cpuUsagePercents\"a\n" +
 	"\n" +
-	"task_count\x18\x06 \x01(\x05R\ttaskCount\x12,\n" +
-	"\x12disk_usage_percent\x18\a \x01(\x01R\x10diskUsagePercent\x12\x1d\n" +
+	"MemoryInfo\x120\n" +
+	"\x14memory_usage_percent\x18\x01 \x01(\x01R\x12memoryUsagePercent\x12!\n" +
+	"\fmemory_total\x18\x02 \x01(\x04R\vmemoryTotal\"\xa9\x01\n" +
+	"\bDiskInfo\x12,\n" +
+	"\x12disk_usage_percent\x18\x01 \x01(\x01R\x10diskUsagePercent\x12\x1d\n" +
 	"\n" +
-	"disk_total\x18\b \x01(\x04R\tdiskTotal\x12&\n" +
-	"\x0fdisk_read_bytes\x18\t \x01(\x05R\rdiskReadBytes\x12(\n" +
-	"\x10disk_write_bytes\x18\n" +
-	" \x01(\x05R\x0ediskWriteBytes\"Q\n" +
+	"disk_total\x18\x02 \x01(\x04R\tdiskTotal\x12&\n" +
+	"\x0fdisk_read_bytes\x18\x03 \x01(\x05R\rdiskReadBytes\x12(\n" +
+	"\x10disk_write_bytes\x18\x04 \x01(\x05R\x0ediskWriteBytes\"\x98\x01\n" +
+	"\vNetworkInfo\x12%\n" +
+	"\x0einterface_name\x18\x01 \x01(\tR\rinterfaceName\x12,\n" +
+	"\x12network_sent_bytes\x18\x02 \x01(\x05R\x10networkSentBytes\x124\n" +
+	"\x16network_received_bytes\x18\x03 \x01(\x05R\x14networkReceivedBytes\"\x9f\x02\n" +
+	"\x06Status\x126\n" +
+	"\x03cpu\x18\x01 \x01(\v2$.worker_2_controller_service.CpuInfoR\x03cpu\x12?\n" +
+	"\x06memory\x18\x02 \x01(\v2'.worker_2_controller_service.MemoryInfoR\x06memory\x129\n" +
+	"\x04disk\x18\x03 \x01(\v2%.worker_2_controller_service.DiskInfoR\x04disk\x12B\n" +
+	"\anetwork\x18\x04 \x01(\v2(.worker_2_controller_service.NetworkInfoR\anetwork\x12\x1d\n" +
+	"\n" +
+	"task_count\x18\x05 \x01(\x05R\ttaskCount\"Q\n" +
 	"\x0eRepeatedStatus\x12?\n" +
-	"\bstatuses\x18\x01 \x03(\v2#.worker_2_controller_service.StatusR\bstatuses\"^\n" +
+	"\bstatuses\x18\x01 \x03(\v2#.worker_2_controller_service.StatusR\bstatuses\"v\n" +
 	"\x0fHeartingRequest\x12\x0e\n" +
-	"\x02ip\x18\x01 \x01(\tR\x02ip\x12;\n" +
-	"\x06status\x18\x02 \x01(\v2#.worker_2_controller_service.StatusR\x06status\"\x12\n" +
-	"\x10HeartingResponse2\xda\x02\n" +
+	"\x02ip\x18\x01 \x01(\tR\x02ip\x12\x16\n" +
+	"\x06secret\x18\x02 \x01(\tR\x06secret\x12;\n" +
+	"\x06status\x18\x03 \x01(\v2#.worker_2_controller_service.StatusR\x06status\",\n" +
+	"\x10HeartingResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xda\x02\n" +
 	"\x11Worker2Controller\x12g\n" +
 	"\fRegistWorker\x12*.worker_2_controller_service.RegistRequest\x1a+.worker_2_controller_service.RegistResponse\x12g\n" +
 	"\bHearting\x12,.worker_2_controller_service.HeartingRequest\x1a-.worker_2_controller_service.HeartingResponse\x12s\n" +
@@ -835,7 +1026,7 @@ func file_worker_proto_rawDescGZIP() []byte {
 	return file_worker_proto_rawDescData
 }
 
-var file_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_worker_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_worker_proto_goTypes = []any{
 	(*RegistRequest)(nil),      // 0: worker_2_controller_service.RegistRequest
 	(*WorkerInfo)(nil),         // 1: worker_2_controller_service.WorkerInfo
@@ -844,28 +1035,36 @@ var file_worker_proto_goTypes = []any{
 	(*TaskReportRequest)(nil),  // 4: worker_2_controller_service.TaskReportRequest
 	(*TaskDistribution)(nil),   // 5: worker_2_controller_service.TaskDistribution
 	(*TaskReportResponse)(nil), // 6: worker_2_controller_service.TaskReportResponse
-	(*Status)(nil),             // 7: worker_2_controller_service.Status
-	(*RepeatedStatus)(nil),     // 8: worker_2_controller_service.RepeatedStatus
-	(*HeartingRequest)(nil),    // 9: worker_2_controller_service.HeartingRequest
-	(*HeartingResponse)(nil),   // 10: worker_2_controller_service.HeartingResponse
+	(*CpuInfo)(nil),            // 7: worker_2_controller_service.CpuInfo
+	(*MemoryInfo)(nil),         // 8: worker_2_controller_service.MemoryInfo
+	(*DiskInfo)(nil),           // 9: worker_2_controller_service.DiskInfo
+	(*NetworkInfo)(nil),        // 10: worker_2_controller_service.NetworkInfo
+	(*Status)(nil),             // 11: worker_2_controller_service.Status
+	(*RepeatedStatus)(nil),     // 12: worker_2_controller_service.RepeatedStatus
+	(*HeartingRequest)(nil),    // 13: worker_2_controller_service.HeartingRequest
+	(*HeartingResponse)(nil),   // 14: worker_2_controller_service.HeartingResponse
 }
 var file_worker_proto_depIdxs = []int32{
 	1,  // 0: worker_2_controller_service.RegistRequest.info:type_name -> worker_2_controller_service.WorkerInfo
 	3,  // 1: worker_2_controller_service.TaskReportRequest.details:type_name -> worker_2_controller_service.Task
 	5,  // 2: worker_2_controller_service.TaskReportResponse.tasks:type_name -> worker_2_controller_service.TaskDistribution
-	7,  // 3: worker_2_controller_service.RepeatedStatus.statuses:type_name -> worker_2_controller_service.Status
-	7,  // 4: worker_2_controller_service.HeartingRequest.status:type_name -> worker_2_controller_service.Status
-	0,  // 5: worker_2_controller_service.Worker2Controller.RegistWorker:input_type -> worker_2_controller_service.RegistRequest
-	9,  // 6: worker_2_controller_service.Worker2Controller.Hearting:input_type -> worker_2_controller_service.HeartingRequest
-	4,  // 7: worker_2_controller_service.Worker2Controller.ReportTaskStatus:input_type -> worker_2_controller_service.TaskReportRequest
-	2,  // 8: worker_2_controller_service.Worker2Controller.RegistWorker:output_type -> worker_2_controller_service.RegistResponse
-	10, // 9: worker_2_controller_service.Worker2Controller.Hearting:output_type -> worker_2_controller_service.HeartingResponse
-	6,  // 10: worker_2_controller_service.Worker2Controller.ReportTaskStatus:output_type -> worker_2_controller_service.TaskReportResponse
-	8,  // [8:11] is the sub-list for method output_type
-	5,  // [5:8] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	7,  // 3: worker_2_controller_service.Status.cpu:type_name -> worker_2_controller_service.CpuInfo
+	8,  // 4: worker_2_controller_service.Status.memory:type_name -> worker_2_controller_service.MemoryInfo
+	9,  // 5: worker_2_controller_service.Status.disk:type_name -> worker_2_controller_service.DiskInfo
+	10, // 6: worker_2_controller_service.Status.network:type_name -> worker_2_controller_service.NetworkInfo
+	11, // 7: worker_2_controller_service.RepeatedStatus.statuses:type_name -> worker_2_controller_service.Status
+	11, // 8: worker_2_controller_service.HeartingRequest.status:type_name -> worker_2_controller_service.Status
+	0,  // 9: worker_2_controller_service.Worker2Controller.RegistWorker:input_type -> worker_2_controller_service.RegistRequest
+	13, // 10: worker_2_controller_service.Worker2Controller.Hearting:input_type -> worker_2_controller_service.HeartingRequest
+	4,  // 11: worker_2_controller_service.Worker2Controller.ReportTaskStatus:input_type -> worker_2_controller_service.TaskReportRequest
+	2,  // 12: worker_2_controller_service.Worker2Controller.RegistWorker:output_type -> worker_2_controller_service.RegistResponse
+	14, // 13: worker_2_controller_service.Worker2Controller.Hearting:output_type -> worker_2_controller_service.HeartingResponse
+	6,  // 14: worker_2_controller_service.Worker2Controller.ReportTaskStatus:output_type -> worker_2_controller_service.TaskReportResponse
+	12, // [12:15] is the sub-list for method output_type
+	9,  // [9:12] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_worker_proto_init() }
@@ -879,7 +1078,7 @@ func file_worker_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_worker_proto_rawDesc), len(file_worker_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

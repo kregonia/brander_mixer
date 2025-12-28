@@ -129,18 +129,30 @@ func (sh *StatusHolder) CopyByKey(key string) *StatusSlice {
 	copyValue := NewStatusSlice(value.(*StatusSlice).BeginTimestamp, defaultRefreshTimes, value.(*StatusSlice).file)
 	copyValue.Lock()
 	for _, status := range value.(*StatusSlice).Status.Statuses {
-		cpuUsages := make([]float64, len(status.CpuUsagePercents))
-		copy(cpuUsages, status.CpuUsagePercents)
+		cpuUsages := make([]float64, len(status.Cpu.CpuUsagePercents))
+		copy(cpuUsages, status.Cpu.CpuUsagePercents)
 		copyStatus := &worker_2_controller_service.Status{
-			CpuLogicalCores:    status.CpuLogicalCores,
-			CpuUsagePercents:   cpuUsages,
-			MemoryUsagePercent: status.MemoryUsagePercent,
-			MemoryTotal:        status.MemoryTotal,
-			TaskCount:          status.TaskCount,
-			DiskUsagePercent:   status.DiskUsagePercent,
-			DiskTotal:          status.DiskTotal,
-			DiskReadBytes:      status.DiskReadBytes,
-			DiskWriteBytes:     status.DiskWriteBytes,
+			Cpu: &worker_2_controller_service.CpuInfo{
+				CpuLogicalCores:       status.Cpu.CpuLogicalCores,
+				SuperThreadingEnabled: status.Cpu.SuperThreadingEnabled,
+				CpuUsagePercents:      cpuUsages,
+			},
+			Memory: &worker_2_controller_service.MemoryInfo{
+				MemoryTotal:        status.Memory.MemoryTotal,
+				MemoryUsagePercent: status.Memory.MemoryUsagePercent,
+			},
+			Disk: &worker_2_controller_service.DiskInfo{
+				DiskUsagePercent: status.Disk.DiskUsagePercent,
+				DiskTotal:        status.Disk.DiskTotal,
+				DiskReadBytes:    status.Disk.DiskReadBytes,
+				DiskWriteBytes:   status.Disk.DiskWriteBytes,
+			},
+			Network: &worker_2_controller_service.NetworkInfo{
+				InterfaceName:        status.Network.InterfaceName,
+				NetworkSentBytes:     status.Network.NetworkSentBytes,
+				NetworkReceivedBytes: status.Network.NetworkReceivedBytes,
+			},
+			TaskCount: status.TaskCount,
 		}
 		copyValue.Status.Statuses = append(copyValue.Status.Statuses, copyStatus)
 	}

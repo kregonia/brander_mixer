@@ -3,9 +3,8 @@ package worker_2_controller_service;
 option go_package = "script/rpc_server/worker;worker_2_controller_service";
 
 message RegistRequest {
-  string worker_id = 1;
-  string password = 2;
-  WorkerInfo info = 3;
+  string ip = 1;
+  WorkerInfo info = 2;
 }
 
 message WorkerInfo {
@@ -13,21 +12,14 @@ message WorkerInfo {
   string hostname = 1;
   string os = 2;
   string platform = 3;
-  string platform_family = 4;
-  string platform_version = 5;
-  string kernel_version = 6;
-  string arch = 7;
+  string platform_version = 4;
+  string kernel_version = 5;
+  string arch = 6;
 
   // CPU
   int32 cpu_logical_cores = 8;
   int32 cpu_physical_cores = 9;
   string cpu_model_name = 10;
-
-  // Memory
-  uint64 memory_total = 11;
-
-  // Disk
-  uint64 disk_total = 12;
 }
 
 message RegistResponse {
@@ -64,23 +56,46 @@ message TaskReportResponse {
   repeated TaskDistribution tasks = 2;
 }
 
-message Status {
-  // CPU
+message CpuInfo {
   int32 cpu_logical_cores = 1;
   bool super_threading_enabled = 2;
   repeated double cpu_usage_percents = 3;
+}
+
+message MemoryInfo {
+  double memory_usage_percent = 1;
+  uint64 memory_total = 2;
+}
+
+message DiskInfo {
+  double disk_usage_percent = 1;
+  uint64 disk_total = 2;
+  int32 disk_read_bytes = 3;
+  int32 disk_write_bytes = 4;
+}
+
+message NetworkInfo {
+  string interface_name = 1;
+  int32 network_sent_bytes = 2;
+  int32 network_received_bytes = 3;
+}
+
+message Status {
+  // CPU
+  CpuInfo cpu = 1;
   
   // Memory
-  double memory_usage_percent = 4;
-  uint64 memory_total = 5;
+  MemoryInfo memory = 2;
+
+  // Disk
+  DiskInfo disk = 3;
+  
+  // Network
+  NetworkInfo network = 4;
 
   // App
-  int32 task_count = 6; 
-  // Disk
-  double disk_usage_percent = 7;
-  uint64 disk_total = 8;
-  int32 disk_read_bytes = 9;
-  int32 disk_write_bytes = 10;
+  int32 task_count = 5; 
+ 
 }
 
 message RepeatedStatus {
@@ -89,9 +104,11 @@ message RepeatedStatus {
 
 message HeartingRequest {
   string ip = 1;
-  Status status = 2;
+  string secret = 2;
+  Status status = 3;
 }
 
 message HeartingResponse {
+  bool success = 1;
 }
 

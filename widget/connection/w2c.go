@@ -51,7 +51,14 @@ func (cc *ControllerClient) RegistWorker2Controller(ctx context.Context, workerI
 			logger.Errorf("failed to regist worker to controller after %d times\n", tryTimes-1)
 			break
 		}
-		response, err := cc.client.RegistWorker(ctx, &worker_2_controller_service.RegistRequest{WorkerId: workerID, Password: password})
+		response, err := cc.client.RegistWorker(
+			ctx,
+			&worker_2_controller_service.RegistRequest{
+				Ip: workerID,
+				// todo: WokerInfo 待补充
+				Info: &worker_2_controller_service.WorkerInfo{},
+			},
+		)
 		if err != nil {
 			logger.Errorf("could not get worker status: %v\n", err)
 		}

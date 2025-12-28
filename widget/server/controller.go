@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 
@@ -18,6 +17,7 @@ type ControllerServer struct {
 
 var (
 	ControllerServerInstance = &ControllerServer{HD: *holder.NewStatusHolder()}
+	RegisterInstance         = holder.NewWorkerAliveSecrets()
 )
 
 func ControllerServering(port string) {
@@ -40,12 +40,18 @@ func ControllerServering(port string) {
 
 func (s *ControllerServer) Hearting(ctx context.Context, req *worker_2_controller_service.HeartingRequest) (*worker_2_controller_service.HeartingResponse, error) {
 	// todo: 维护status状态集
-	fmt.Println("accept the hearting")
-	s.HD.AppendStatusByKey(req.Ip, req.GetStatus())
-	return &worker_2_controller_service.HeartingResponse{}, nil
+	if !RegisterInstance.CompareSecret(req.Ip, req.GetSecret()) {
+		return &worker_2_controller_service.HeartingResponse{Success: false}, nil
+	}
+	go s.HD.AppendStatusByKey(req.Ip, req.GetStatus())
+	return &worker_2_controller_service.HeartingResponse{Success: true}, nil
 }
 
 func (s *ControllerServer) RegistWorker(ctx context.Context, in *worker_2_controller_service.RegistRequest) (*worker_2_controller_service.RegistResponse, error) {
-	fmt.Println(in.WorkerId)
-	return &worker_2_controller_service.RegistResponse{Success: true}, nil
+	RegisterInstance.SetSecret(in.Ip)
+	secret, exist := RegisterInstance.GetSecret(in.Ip)
+	if exist {
+		return &worker_2_controller_service.RegistResponse{Success: false, Secret: ""}, nil
+	}
+	return &worker_2_controller_service.RegistResponse{Success: true, Secret: secret}, nil
 }
