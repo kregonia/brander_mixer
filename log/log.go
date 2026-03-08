@@ -198,13 +198,13 @@ func getGlobal() *LogSystem {
 	return globalNew
 }
 
-func Notice(v ...any)                 { getGlobal().write(NOTICE, "", v...) }
+func Notice(v ...any)                 { getGlobal().write(NOTICE, "%s", fmt.Sprint(v...)) }
 func Noticef(format string, v ...any) { getGlobal().write(NOTICE, format, v...) }
-func Warn(v ...any)                   { getGlobal().write(WARNING, "", v...) }
+func Warn(v ...any)                   { getGlobal().write(WARNING, "%s", fmt.Sprint(v...)) }
 func Warnf(format string, v ...any)   { getGlobal().write(WARNING, format, v...) }
-func Error(v ...any)                  { getGlobal().write(ERROR, "", v...) }
+func Error(v ...any)                  { getGlobal().write(ERROR, "%s", fmt.Sprint(v...)) }
 func Errorf(format string, v ...any)  { getGlobal().write(ERROR, format, v...) }
-func Fatal(v ...any)                  { getGlobal().write(FATAL, "", v...) }
+func Fatal(v ...any)                  { getGlobal().write(FATAL, "%s", fmt.Sprint(v...)) }
 func Fatalf(format string, v ...any)  { getGlobal().write(FATAL, format, v...) }
 
 func CloseAll() {

@@ -5,3 +5,4 @@ cmd/demo
 data/
 bin/
 logs/
+.context/

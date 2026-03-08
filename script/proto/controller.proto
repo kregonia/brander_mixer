@@ -3,7 +3,11 @@ syntax = "proto3";
 package controller_2_worker_service;
 option go_package = "script/rpc_server/controller;controller_2_worker_service";
 
-message Task{
+// ---------------------------------------------------------------------------
+// 原有消息（保持向后兼容）
+// ---------------------------------------------------------------------------
+
+message Task {
   int32 task_type = 1;
   int32 task_level = 2;
   int32 task_priority = 3;
@@ -14,4 +18,162 @@ message Task{
 message TaskReportRequest {
   string task_port_id = 1;
   repeated Task details = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Controller → Worker 任务下发相关消息
+// ---------------------------------------------------------------------------
+
+// 任务分片描述（由 scheduler.SplitTask 生成）
+message TaskChunk {
+  string task_id = 1;         // 全局唯一任务 ID
+  string parent_task_id = 2;  // 父任务 ID（拆分前的原始任务）
+  int32  chunk_index = 3;     // 分片索引（从 0 开始）
+  int32  total_chunks = 4;    // 总分片数
+
+  // 任务类型
+  string task_type = 5;       // "video_transcode", "image_process", "generic"
+
+  // 视频转码专用字段
+  string input_url = 10;      // 输入文件 URL 或路径
+  string output_url = 11;     // 输出文件 URL 或路径
+  int64  start_offset = 12;   // 起始偏移（帧号或字节偏移）
+  int64  length = 13;         // 长度（帧数或字节数）
+  string codec = 14;          // 目标编码器（如 "libx264", "libsvtav1"）
+  string preset = 15;         // 编码预设（如 "fast", "medium"）
+  int32  crf = 16;            // 质量参数
+  string extra_args = 17;     // 额外 FFmpeg 参数（JSON 格式）
+
+  // 通用任务字段
+  bytes  payload = 20;        // 通用任务载荷
+  map<string, string> metadata = 21; // 自定义元数据
+
+  // 优先级 & 超时
+  int32  priority = 30;       // 优先级（越大越高）
+  int64  timeout_ms = 31;     // 任务超时（毫秒），0 表示不限
+}
+
+// 任务下发请求
+message DispatchTaskRequest {
+  TaskChunk chunk = 1;
+}
+
+// 任务下发响应
+message DispatchTaskResponse {
+  bool   accepted = 1;        // worker 是否接受该任务
+  string reason = 2;          // 拒绝原因（accepted=false 时有值）
+  string worker_id = 3;       // worker 自身 ID（确认身份）
+}
+
+// 取消任务请求
+message CancelTaskRequest {
+  string task_id = 1;         // 要取消的任务 ID
+  string reason = 2;          // 取消原因
+}
+
+// 取消任务响应
+message CancelTaskResponse {
+  bool   success = 1;
+  string message = 2;         // 详细信息
+}
+
+// Ping 请求（controller 主动探活 worker）
+message PingRequest {
+  int64 timestamp = 1;        // 发送时间戳（unix ms）
+}
+
+// Ping 响应
+message PingResponse {
+  int64  request_timestamp = 1;  // 回传请求时间戳
+  int64  response_timestamp = 2; // worker 响应时间戳
+  string worker_id = 3;
+  int32  current_task_count = 4; // 当前正在执行的任务数
+  double cpu_usage_percent = 5;  // 当前 CPU 使用率
+  double memory_usage_percent = 6; // 当前内存使用率
+}
+
+// 任务进度上报（worker → controller，通过此服务的流式或单次调用）
+message TaskProgressReport {
+  string task_id = 1;
+  string worker_id = 2;
+
+  // 进度
+  double progress_percent = 3; // [0, 100]
+  int64  processed_units = 4;  // 已处理单元数
+  int64  total_units = 5;      // 总单元数
+
+  // 状态
+  TaskStatus status = 6;
+
+  // 性能指标
+  double fps = 10;              // 视频处理帧率
+  double speed_ratio = 11;      // 处理速度比（1.0 = 实时）
+  int64  eta_ms = 12;           // 预计剩余时间（毫秒）
+
+  // 错误信息
+  string error_message = 20;
+
+  // 时间戳
+  int64 timestamp = 30;
+}
+
+// 任务状态枚举
+enum TaskStatus {
+  TASK_STATUS_UNKNOWN = 0;
+  TASK_STATUS_PENDING = 1;      // 已接收，等待执行
+  TASK_STATUS_RUNNING = 2;      // 正在执行
+  TASK_STATUS_COMPLETED = 3;    // 执行完成
+  TASK_STATUS_FAILED = 4;       // 执行失败
+  TASK_STATUS_CANCELLED = 5;    // 已取消
+  TASK_STATUS_TIMEOUT = 6;      // 超时
+}
+
+// 任务进度上报响应
+message TaskProgressResponse {
+  bool received = 1;
+  // controller 可以通过此字段告知 worker 是否需要取消任务
+  bool should_cancel = 2;
+}
+
+// 查询 worker 当前任务列表
+message ListTasksRequest {
+  // 空，查询 worker 上所有任务
+}
+
+message TaskInfo {
+  string task_id = 1;
+  string task_type = 2;
+  TaskStatus status = 3;
+  double progress_percent = 4;
+  int64  start_time = 5;       // 任务开始执行时间（unix ms）
+  int64  elapsed_ms = 6;       // 已耗时（毫秒）
+}
+
+message ListTasksResponse {
+  string worker_id = 1;
+  repeated TaskInfo tasks = 2;
+}
+
+// ---------------------------------------------------------------------------
+// Controller2Worker 服务定义
+//
+// 这是 controller 主动调用 worker 的 gRPC 服务。
+// worker 启动时需要同时开启此服务的 server 端。
+// ---------------------------------------------------------------------------
+
+service Controller2Worker {
+  // 下发任务分片到 worker
+  rpc DispatchTask(DispatchTaskRequest) returns (DispatchTaskResponse);
+
+  // 取消正在执行的任务
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+
+  // controller 主动 ping worker（探活 + 延迟测量）
+  rpc Ping(PingRequest) returns (PingResponse);
+
+  // worker 上报任务进度（单次调用，worker 定期调用）
+  rpc ReportProgress(TaskProgressReport) returns (TaskProgressResponse);
+
+  // 查询 worker 上当前所有任务
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
 }

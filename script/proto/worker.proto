@@ -5,6 +5,7 @@ option go_package = "script/rpc_server/worker;worker_2_controller_service";
 message RegistRequest {
   string ip = 1;
   WorkerInfo info = 2;
+  string worker_grpc_addr = 3;  // worker 侧 Controller2Worker gRPC 服务的监听地址
 }
 
 message WorkerInfo {
@@ -20,6 +21,14 @@ message WorkerInfo {
   int32 cpu_logical_cores = 8;
   int32 cpu_physical_cores = 9;
   string cpu_model_name = 10;
+
+  // Memory（静态总量，注册时上报一次）
+  uint64 memory_total = 11;
+
+  // GPU / VPU / NPU（预留，用于异构设备能力建模）
+  string gpu_name = 12;          // GPU 型号名称，无 GPU 则为空
+  uint64 gpu_memory = 13;        // GPU 显存（bytes），无 GPU 则为 0
+  bool   hardware_encoder = 14;  // 是否支持硬件编码器（如 NVENC / VideoToolbox / VAAPI）
 }
 
 message RegistResponse {
@@ -83,19 +92,19 @@ message NetworkInfo {
 message Status {
   // CPU
   CpuInfo cpu = 1;
-  
+
   // Memory
   MemoryInfo memory = 2;
 
   // Disk
   DiskInfo disk = 3;
-  
+
   // Network
   NetworkInfo network = 4;
 
   // App
-  int32 task_count = 5; 
- 
+  int32 task_count = 5;
+
 }
 
 message RepeatedStatus {
@@ -111,4 +120,3 @@ message HeartingRequest {
 message HeartingResponse {
   bool success = 1;
 }
-

@@ -14,8 +14,8 @@ import (
 
 var (
 	preDiskStat                 map[string]disk.IOCountersStat
-	preNetworkStat              []net.IOCountersStat
-	diskCapacityRefreshTimeLeft = 0 // 每隔 10 分钟刷新一次磁盘容量数据
+	preNetworkStat              map[string]net.IOCountersStat // key = interface name
+	diskCapacityRefreshTimeLeft = 0                           // 每隔 10 分钟刷新一次磁盘容量数据
 )
 
 // GetWorkerStatus 收集当前机器的基础运行信息（尽量在 Linux 上工作）
@@ -54,7 +54,13 @@ func GetWorkerStatus() (*worker_2_controller_service.Status, error) {
 		DiskWriteBytes:   writeBytesPer5Sec,
 	}
 	// Network 信息
-	// todo: 网络信息待补充
+	netIfaceName, sentBytesPerInterval, recvBytesPerInterval := calculateNetworkIOPerInterval()
+
+	networkInfo := &worker_2_controller_service.NetworkInfo{
+		InterfaceName:        netIfaceName,
+		NetworkSentBytes:     sentBytesPerInterval,
+		NetworkReceivedBytes: recvBytesPerInterval,
+	}
 
 	return &worker_2_controller_service.Status{
 		Cpu: &worker_2_controller_service.CpuInfo{
@@ -66,9 +72,8 @@ func GetWorkerStatus() (*worker_2_controller_service.Status, error) {
 			MemoryUsagePercent: memUsage,
 			MemoryTotal:        memTotal,
 		},
-		Disk: diskInfo,
-		// todo: 网络信息待补充
-		Network: &worker_2_controller_service.NetworkInfo{},
+		Disk:    diskInfo,
+		Network: networkInfo,
 		// todo: 任务数待补充
 		TaskCount: 0,
 	}, nil
@@ -102,13 +107,97 @@ func isExternalInterface(iface net.InterfaceStat) bool {
 	return false
 }
 
-// func getExternalInterfaces() ([]net.InterfaceStat, error) {
-// 	ifaces, err := net.Interfaces()
-// 	if err != nil {
-// 		return nil, err
-// 	}
+// getExternalInterfaceNames 返回所有物理（非虚拟/回环）网络接口名称列表
+func getExternalInterfaceNames() []string {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+	var names []string
+	for _, iface := range ifaces {
+		if isExternalInterface(iface) {
+			names = append(names, iface.Name)
+		}
+	}
+	return names
+}
 
-// }
+// calculateNetworkIOPerInterval 计算每个心跳周期内的网络收发字节数
+//
+// 返回: (接口名, 每周期发送字节数, 每周期接收字节数)
+// 多个物理接口的流量会累加到一起，接口名取第一个物理接口的名称。
+func calculateNetworkIOPerInterval() (string, int32, int32) {
+	// 获取所有网络接口的 IO 计数器
+	counters, err := net.IOCounters(true) // pernic=true，按接口分别返回
+	if err != nil {
+		return "", 0, 0
+	}
+
+	// 筛选物理接口名称
+	externalNames := getExternalInterfaceNames()
+	externalSet := make(map[string]bool, len(externalNames))
+	for _, n := range externalNames {
+		externalSet[n] = true
+	}
+
+	// 构建当前快照：只保留物理接口
+	currentStats := make(map[string]net.IOCountersStat, len(counters))
+	for _, c := range counters {
+		if externalSet[c.Name] {
+			currentStats[c.Name] = c
+		}
+	}
+
+	// 如果没有找到物理接口，回退到所有非 lo 接口
+	if len(currentStats) == 0 {
+		for _, c := range counters {
+			if !strings.HasPrefix(c.Name, "lo") {
+				currentStats[c.Name] = c
+			}
+		}
+	}
+
+	var totalSentDelta, totalRecvDelta uint64
+	primaryIface := ""
+
+	if preNetworkStat != nil {
+		for name, cur := range currentStats {
+			if primaryIface == "" {
+				primaryIface = name
+			}
+			if prev, ok := preNetworkStat[name]; ok {
+				// 计算差值（处理计数器回绕：如果当前值小于上次，说明回绕了，跳过）
+				if cur.BytesSent >= prev.BytesSent {
+					totalSentDelta += cur.BytesSent - prev.BytesSent
+				}
+				if cur.BytesRecv >= prev.BytesRecv {
+					totalRecvDelta += cur.BytesRecv - prev.BytesRecv
+				}
+			}
+		}
+	} else {
+		// 第一次采集，还没有上一次的数据，只记录快照
+		for name := range currentStats {
+			if primaryIface == "" {
+				primaryIface = name
+			}
+		}
+	}
+
+	// 保存当前快照供下次计算差值
+	preNetworkStat = currentStats
+
+	// 转换为每秒速率（除以心跳间隔秒数），然后返回整个周期的字节数
+	intervalSec := int64(parameter.DefaultIntervalSeconds)
+	if intervalSec <= 0 {
+		intervalSec = 5
+	}
+
+	sentPerSec := int32(totalSentDelta / uint64(intervalSec))
+	recvPerSec := int32(totalRecvDelta / uint64(intervalSec))
+
+	return primaryIface, sentPerSec, recvPerSec
+}
 
 func calculateDiskIOPerInterval() (int32, int32, error) {
 	readBytesPer5Sec := uint64(0)
